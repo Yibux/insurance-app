@@ -2,6 +2,11 @@
 
 The master's repository — an insurance application built on the Salesforce platform (Salesforce DX project).
 
+## Documentation
+
+- [docs/RAPORT.md](docs/RAPORT.md) — thesis report: topic, scope, literature review
+- [docs/HARMONOGRAM.md](docs/HARMONOGRAM.md) — work schedule, tech stack, research plan
+
 ## Structure
 
 - `force-app/main/default` — metadata source (Apex classes, triggers, LWC, objects, layouts, permission sets, ...)
