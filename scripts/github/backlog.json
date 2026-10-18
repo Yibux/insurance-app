@@ -1,0 +1,1484 @@
+{
+  "repo": "Yibux/insurance-app",
+  "project": {
+    "title": "insurance-app — Master's thesis",
+    "description": "Secure insurance system on Salesforce built with DevSecOps — implementation and thesis plan."
+  },
+  "labels": [
+    {
+      "name": "type:epic",
+      "color": "3E4B9E",
+      "description": "Stage-level epic"
+    },
+    {
+      "name": "type:feature",
+      "color": "1D76DB",
+      "description": "Functionality"
+    },
+    {
+      "name": "type:chore",
+      "color": "BFD4F2",
+      "description": "Setup, configuration, maintenance"
+    },
+    {
+      "name": "type:spike",
+      "color": "FBCA04",
+      "description": "Time-boxed investigation"
+    },
+    {
+      "name": "type:docs",
+      "color": "0E8A16",
+      "description": "Documentation / ADR"
+    },
+    {
+      "name": "type:research",
+      "color": "D93F0B",
+      "description": "Experiment / measurements"
+    },
+    {
+      "name": "type:thesis",
+      "color": "5319E7",
+      "description": "Thesis writing"
+    },
+    {
+      "name": "area:repo",
+      "color": "EDEDED",
+      "description": "Repository and process"
+    },
+    { "name": "area:ci", "color": "C5DEF5", "description": "CI/CD pipeline" },
+    {
+      "name": "area:security",
+      "color": "B60205",
+      "description": "Security model and gates"
+    },
+    {
+      "name": "area:data-model",
+      "color": "C2E0C6",
+      "description": "Salesforce data model and Apex"
+    },
+    {
+      "name": "area:portal",
+      "color": "F9D0C4",
+      "description": "Experience Cloud and LWC"
+    },
+    {
+      "name": "area:backend",
+      "color": "FEF2C0",
+      "description": "Python integration server"
+    },
+    {
+      "name": "area:external-objects",
+      "color": "D4C5F9",
+      "description": "Salesforce Connect / OData"
+    },
+    {
+      "name": "area:experiment",
+      "color": "E99695",
+      "description": "Research experiment"
+    },
+    {
+      "name": "area:thesis",
+      "color": "D876E3",
+      "description": "Thesis document"
+    },
+    {
+      "name": "priority:P1",
+      "color": "B60205",
+      "description": "Blocks the stage"
+    },
+    { "name": "priority:P2", "color": "FBCA04", "description": "Important" },
+    { "name": "priority:P3", "color": "0E8A16", "description": "Nice to have" },
+    { "name": "size:S", "color": "EDEDED", "description": "Up to half a day" },
+    { "name": "size:M", "color": "D4D4D4", "description": "1–2 days" },
+    { "name": "size:L", "color": "A0A0A0", "description": "About 3 days" }
+  ],
+  "milestones": [
+    {
+      "key": "M0",
+      "title": "M0 Foundation",
+      "start": "2026-10-12",
+      "due": "2026-10-25"
+    },
+    {
+      "key": "M1",
+      "title": "M1 DevSecOps pipeline",
+      "start": "2026-10-26",
+      "due": "2026-12-06"
+    },
+    {
+      "key": "M2",
+      "title": "M2 Data model & security",
+      "start": "2026-12-07",
+      "due": "2027-01-31"
+    },
+    {
+      "key": "M3",
+      "title": "M3 Experience Cloud portal",
+      "start": "2027-02-01",
+      "due": "2027-03-14"
+    },
+    {
+      "key": "M4",
+      "title": "M4 Python backend — data loading",
+      "start": "2027-03-15",
+      "due": "2027-04-25"
+    },
+    {
+      "key": "M5",
+      "title": "M5 External Objects",
+      "start": "2027-04-26",
+      "due": "2027-05-31"
+    },
+    {
+      "key": "M6",
+      "title": "M6 Experiment & hardening",
+      "start": "2027-06-01",
+      "due": "2027-06-15"
+    },
+    {
+      "key": "M7",
+      "title": "M7 Thesis writing",
+      "start": "2026-11-02",
+      "due": "2027-08-31"
+    },
+    {
+      "key": "M8",
+      "title": "M8 Submission & defense",
+      "start": "2027-09-01",
+      "due": "2027-09-30"
+    }
+  ],
+  "literature": {
+    "FR-CI-02": "Guduru 2023; SF DX Guide",
+    "FR-CI-03": "Bavadiya 2022",
+    "FR-CI-04": "Bavadiya 2022; IEEE/ACM 2022",
+    "FR-CI-05": "IEEE 2025 SLR",
+    "FR-CI-06": "Cheenepalli i in. 2025",
+    "FR-CI-09": "Shift Left Security 2025",
+    "FR-EXT-02": "Machapatri 2020",
+    "FR-MIG-01": "Machapatri 2020",
+    "NFR-SEC-01": "Al Kalach 2025",
+    "NFR-SEC-02": "Al Kalach 2025",
+    "NFR-SEC-03": "Al Kalach 2025; IEEE/ACM 2022",
+    "NFR-SEC-05": "IEEE 2025 SLR; Lakade 2025",
+    "NFR-SEC-06": "Machapatri 2020; Lakade 2025",
+    "NFR-SEC-07": "Al Kalach 2025",
+    "NFR-SEC-08": "Machapatri 2020",
+    "NFR-PERF-01": "Bavadiya 2022; Cheenepalli i in. 2025",
+    "NFR-MNT-04": "Jammeh 2020",
+    "NFR-CMP-01": "Machapatri 2020"
+  },
+  "epics": [
+    {
+      "milestone": "M0",
+      "title": "[Epic] M0 Foundation — environments, repo rules, spikes",
+      "area": "repo",
+      "docFile": "docs/implementacja/M0-fundament.md",
+      "goal": "Prepare Dev Hub, repository rules, JWT credentials and de-risk Experience Cloud and Salesforce Connect before building anything.",
+      "dod": "Dev Hub (DE) created; SFDX scaffold on main; branch protection; External Client App + JWT certificate; spikes for Experience Cloud in scratch org and Salesforce Connect OData done.",
+      "tasks": [
+        {
+          "title": "Sign up Developer Edition org and enable Dev Hub",
+          "type": "chore",
+          "area": "repo",
+          "priority": "P1",
+          "size": "S",
+          "start": "2026-10-12",
+          "due": "2026-10-13",
+          "requirements": ["NFR-MNT-01"],
+          "acceptance": [
+            "DE org created, Dev Hub and Unlocked Packages enabled",
+            "`sf org login web --set-default-dev-hub` works locally",
+            "Scratch org created from `config/project-scratch-def.json`"
+          ]
+        },
+        {
+          "title": "Merge SFDX scaffold into main and verify local setup from README",
+          "type": "chore",
+          "area": "repo",
+          "priority": "P1",
+          "size": "S",
+          "start": "2026-10-13",
+          "due": "2026-10-14",
+          "requirements": ["NFR-MNT-05"],
+          "acceptance": [
+            "`feature/sfdx-project-scaffold` merged",
+            "Fresh clone: `npm install`, scratch org create, deploy succeed",
+            "README commands verified"
+          ]
+        },
+        {
+          "title": "Add repository conventions, issue/PR templates and CODEOWNERS",
+          "type": "docs",
+          "area": "repo",
+          "priority": "P1",
+          "size": "S",
+          "start": "2026-10-14",
+          "due": "2026-10-15",
+          "requirements": ["NFR-MNT-03", "NFR-MNT-04"],
+          "acceptance": [
+            "`docs/KONWENCJE.md`, `.github/ISSUE_TEMPLATE/*`, PR template, CODEOWNERS on main",
+            "Backlog created with `scripts/github/create-backlog.mjs`",
+            "Project views configured"
+          ]
+        },
+        {
+          "title": "Configure branch protection on main",
+          "type": "chore",
+          "area": "security",
+          "priority": "P1",
+          "size": "S",
+          "start": "2026-10-15",
+          "due": "2026-10-15",
+          "requirements": ["NFR-SEC-11"],
+          "acceptance": [
+            "PR required, no direct pushes, no force-push",
+            "Required status checks placeholder (updated in M1)",
+            "Squash merge only, auto-delete branches"
+          ]
+        },
+        {
+          "title": "Create External Client App with JWT certificate for CI",
+          "type": "chore",
+          "area": "security",
+          "priority": "P1",
+          "size": "M",
+          "start": "2026-10-16",
+          "due": "2026-10-19",
+          "requirements": ["NFR-SEC-05", "NFR-SEC-06"],
+          "acceptance": [
+            "Self-signed certificate generated; private key never committed",
+            "External Client App (or Connected App) with JWT Bearer, pre-authorized CI user/profile",
+            "`sf org login jwt` works locally against Dev Hub",
+            "Key and client id stored in GitHub Environment secrets",
+            "Certificate rotation procedure documented"
+          ],
+          "adr": true
+        },
+        {
+          "title": "Spike: Experience Cloud LWR site in a scratch org",
+          "type": "spike",
+          "area": "portal",
+          "priority": "P1",
+          "size": "M",
+          "start": "2026-10-19",
+          "due": "2026-10-21",
+          "requirements": ["FR-PRT-01"],
+          "acceptance": [
+            "Scratch def with `Communities` feature and network settings",
+            "LWR site created, retrieved to source and redeployed to a new scratch org",
+            "Verdict note in `docs/spikes/experience-cloud-lwr.md`"
+          ]
+        },
+        {
+          "title": "Spike: Salesforce Connect OData 4.0 availability in DE/scratch",
+          "type": "spike",
+          "area": "external-objects",
+          "priority": "P1",
+          "size": "M",
+          "start": "2026-10-21",
+          "due": "2026-10-23",
+          "requirements": ["FR-EXT-02"],
+          "acceptance": [
+            "Check feature availability/limits in DE and scratch orgs",
+            "External Data Source to a public sample OData service works",
+            "Verdict + fallback (e.g. custom Apex callout + LWC) in `docs/spikes/salesforce-connect-odata.md`"
+          ]
+        },
+        {
+          "title": "ADR-001 monorepo and ADR-002 custom objects instead of Financial Services Cloud",
+          "type": "docs",
+          "area": "repo",
+          "priority": "P2",
+          "size": "S",
+          "start": "2026-10-23",
+          "due": "2026-10-24",
+          "requirements": ["NFR-MNT-03"],
+          "acceptance": [
+            "`docs/adr/0001-monorepo.md`",
+            "`docs/adr/0002-custom-objects-vs-fsc.md`",
+            "ADR index updated"
+          ]
+        },
+        {
+          "title": "Review requirements specification with supervisor",
+          "type": "docs",
+          "area": "thesis",
+          "priority": "P1",
+          "size": "S",
+          "start": "2026-10-20",
+          "due": "2026-10-25",
+          "requirements": [],
+          "acceptance": [
+            "`docs/WYMAGANIA.md` discussed with supervisor",
+            "Feedback applied, version bumped to 1.0"
+          ]
+        },
+        {
+          "title": "Agree thesis outline (table of contents) with supervisor",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P1",
+          "size": "S",
+          "start": "2026-10-20",
+          "due": "2026-10-25",
+          "requirements": [],
+          "acceptance": [
+            "Chapter list agreed",
+            "Outline added to `Praca Magisterska.docx`",
+            "Thesis issues in M7 adjusted if needed"
+          ]
+        }
+      ]
+    },
+    {
+      "milestone": "M1",
+      "title": "[Epic] M1 DevSecOps pipeline (shift-left)",
+      "area": "ci",
+      "docFile": "docs/implementacja/M1-potok-devsecops.md",
+      "goal": "Every pull request is validated in an ephemeral scratch org with tests, SAST, secret and dependency scanning before any business logic is written.",
+      "dod": "`pr-validation.yml`: scratch org → deploy → Apex + Jest → Code Analyzer → 75% gate → delete org; gitleaks, CodeQL, Dependabot; reports in PR; pipeline documentation.",
+      "tasks": [
+        {
+          "title": "Create pr-validation workflow: lint, Prettier check and LWC Jest",
+          "type": "feature",
+          "area": "ci",
+          "priority": "P1",
+          "size": "S",
+          "start": "2026-10-26",
+          "due": "2026-10-27",
+          "requirements": ["FR-CI-01", "NFR-QA-04"],
+          "acceptance": [
+            "`.github/workflows/pr-validation.yml` runs on pull_request to main",
+            "npm cache, pinned action versions (SHA)",
+            "Fails on lint/format/Jest errors"
+          ]
+        },
+        {
+          "title": "Authenticate CI to Dev Hub with JWT Bearer Flow",
+          "type": "feature",
+          "area": "security",
+          "priority": "P1",
+          "size": "S",
+          "start": "2026-10-28",
+          "due": "2026-10-29",
+          "requirements": ["NFR-SEC-05", "NFR-SEC-06"],
+          "acceptance": [
+            "Key written to a temp file from secret and removed in `always()` step",
+            "Job uses a GitHub Environment",
+            "No credentials in logs"
+          ]
+        },
+        {
+          "title": "Create, deploy to and always delete a scratch org per PR",
+          "type": "feature",
+          "area": "ci",
+          "priority": "P1",
+          "size": "M",
+          "start": "2026-10-29",
+          "due": "2026-11-03",
+          "requirements": ["FR-CI-02", "NFR-PERF-05"],
+          "acceptance": [
+            "Scratch org created with short duration and unique alias",
+            "Source deployed; failure fails the job",
+            "Org deleted in an `always()` step",
+            "`concurrency` limits parallel runs to respect DE limits"
+          ]
+        },
+        {
+          "title": "Run Apex tests and enforce 75% coverage gate (check_coverage.py)",
+          "type": "feature",
+          "area": "ci",
+          "priority": "P1",
+          "size": "M",
+          "start": "2026-11-03",
+          "due": "2026-11-06",
+          "requirements": ["FR-CI-03", "NFR-QA-01"],
+          "acceptance": [
+            "`sf apex run test --code-coverage --result-format json` output saved",
+            "`scripts/ci/check_coverage.py` fails below threshold (org-wide and per class option)",
+            "Unit tests for the script",
+            "Threshold configurable"
+          ]
+        },
+        {
+          "title": "Integrate Salesforce Code Analyzer v5 with severity gate and SARIF",
+          "type": "feature",
+          "area": "security",
+          "priority": "P1",
+          "size": "M",
+          "start": "2026-11-09",
+          "due": "2026-11-12",
+          "requirements": ["FR-CI-04", "FR-CI-07", "NFR-SEC-03", "NFR-SEC-04"],
+          "acceptance": [
+            "`code-analyzer.yml` with selected engines (PMD, ESLint, RetireJS, Flow, Graph Engine)",
+            "Job fails on severity ≤ 2",
+            "SARIF uploaded to GitHub code scanning",
+            "Rule selection documented"
+          ],
+          "adr": true
+        },
+        {
+          "title": "Add gitleaks secret scanning in CI and pre-commit",
+          "type": "feature",
+          "area": "security",
+          "priority": "P1",
+          "size": "S",
+          "start": "2026-11-12",
+          "due": "2026-11-13",
+          "requirements": ["FR-CI-05", "FR-CI-09", "NFR-SEC-05"],
+          "acceptance": [
+            "gitleaks job on PR (full history on first run)",
+            "Husky pre-commit runs gitleaks on staged files",
+            "Allowlist file documented"
+          ]
+        },
+        {
+          "title": "Add CodeQL workflow for JavaScript",
+          "type": "feature",
+          "area": "security",
+          "priority": "P2",
+          "size": "S",
+          "start": "2026-11-16",
+          "due": "2026-11-16",
+          "requirements": ["FR-CI-06"],
+          "acceptance": [
+            "`.github/workflows/codeql.yml` on PR and weekly schedule",
+            "Results visible in Security tab"
+          ]
+        },
+        {
+          "title": "Configure Dependabot and npm audit gate",
+          "type": "feature",
+          "area": "security",
+          "priority": "P2",
+          "size": "S",
+          "start": "2026-11-17",
+          "due": "2026-11-17",
+          "requirements": ["FR-CI-05"],
+          "acceptance": [
+            "`.github/dependabot.yml` for npm and github-actions (pip added in M4)",
+            "`npm audit --audit-level=high` step in PR validation"
+          ]
+        },
+        {
+          "title": "Publish test and scan reports as PR job summary and artifacts",
+          "type": "feature",
+          "area": "ci",
+          "priority": "P2",
+          "size": "M",
+          "start": "2026-11-18",
+          "due": "2026-11-20",
+          "requirements": ["FR-CI-07", "NFR-OBS-02"],
+          "acceptance": [
+            "Job summary table: coverage, Code Analyzer counts, test results",
+            "Raw reports uploaded as artifacts",
+            "Durations of each gate recorded (input for experiment)"
+          ]
+        },
+        {
+          "title": "Review Husky and lint-staged pre-commit hooks",
+          "type": "chore",
+          "area": "ci",
+          "priority": "P3",
+          "size": "S",
+          "start": "2026-11-23",
+          "due": "2026-11-23",
+          "requirements": ["FR-CI-09"],
+          "acceptance": [
+            "Pre-commit: Prettier, ESLint, gitleaks on staged files",
+            "Commit-msg hook validates Conventional Commits (commitlint)"
+          ]
+        },
+        {
+          "title": "Create deploy workflow to target org with environment approval",
+          "type": "feature",
+          "area": "ci",
+          "priority": "P1",
+          "size": "M",
+          "start": "2026-11-24",
+          "due": "2026-11-27",
+          "requirements": ["FR-CI-08", "NFR-SEC-06"],
+          "acceptance": [
+            "`.github/workflows/deploy.yml` on push to main",
+            "Validate-then-quick-deploy with `RunLocalTests`",
+            "Requires manual approval in `production` environment",
+            "Separate JWT credentials per environment"
+          ]
+        },
+        {
+          "title": "Update branch protection with required pipeline checks",
+          "type": "chore",
+          "area": "security",
+          "priority": "P1",
+          "size": "S",
+          "start": "2026-11-30",
+          "due": "2026-11-30",
+          "requirements": ["NFR-SEC-11"],
+          "acceptance": [
+            "All PR validation jobs required",
+            "Test PR proves merge is blocked on failure"
+          ]
+        },
+        {
+          "title": "Measure baseline pipeline duration",
+          "type": "research",
+          "area": "experiment",
+          "priority": "P2",
+          "size": "S",
+          "start": "2026-12-01",
+          "due": "2026-12-02",
+          "requirements": ["NFR-PERF-01"],
+          "acceptance": [
+            "≥ 5 runs measured, per-gate durations in `docs/experiment/results/baseline.csv`",
+            "Median/variance noted"
+          ]
+        },
+        {
+          "title": "Document the pipeline and write ADR GitHub Actions vs Copado",
+          "type": "docs",
+          "area": "ci",
+          "priority": "P1",
+          "size": "M",
+          "start": "2026-12-02",
+          "due": "2026-12-06",
+          "requirements": ["NFR-MNT-03"],
+          "acceptance": [
+            "`docs/architektura/potok-cicd.md` with Mermaid diagram of jobs and gates",
+            "`docs/adr/` GitHub Actions + SF CLI vs Copado",
+            "Thesis notes: link gates to Bavadiya 2022 and Cheenepalli 2025"
+          ]
+        }
+      ]
+    },
+    {
+      "milestone": "M2",
+      "title": "[Epic] M2 Data model & security model",
+      "area": "data-model",
+      "docFile": "docs/implementacja/M2-model-danych-bezpieczenstwo.md",
+      "goal": "Implement the insurance data model and a Zero-Trust access model with layered Apex code and ≥ 85% coverage.",
+      "dod": "Policy/Coverage/Claim objects, OWD Private, permission sets (Agent, Claims Adjuster, Customer), Apex services with USER_MODE, triggers, tests ≥ 85%, test data via `sf data import tree`.",
+      "tasks": [
+        {
+          "title": "Design data model (ERD) and document it",
+          "type": "docs",
+          "area": "data-model",
+          "priority": "P1",
+          "size": "S",
+          "start": "2026-12-07",
+          "due": "2026-12-08",
+          "requirements": ["FR-POL-01", "FR-CLM-01", "NFR-CMP-03"],
+          "acceptance": [
+            "Mermaid ERD in `docs/architektura/model-danych.md`",
+            "Field list with data classification (PII / sensitive)"
+          ]
+        },
+        {
+          "title": "Create Policy__c and Coverage__c objects with fields and validation rules",
+          "type": "feature",
+          "area": "data-model",
+          "priority": "P1",
+          "size": "M",
+          "start": "2026-12-08",
+          "due": "2026-12-11",
+          "requirements": ["FR-POL-01", "FR-POL-02", "FR-POL-03"],
+          "acceptance": [
+            "Objects, fields, record types/picklists in source",
+            "Validation rules for dates and status path",
+            "External ID fields for migration"
+          ]
+        },
+        {
+          "title": "Create Claim__c and Claim_Document__c objects with field history",
+          "type": "feature",
+          "area": "data-model",
+          "priority": "P1",
+          "size": "M",
+          "start": "2026-12-14",
+          "due": "2026-12-17",
+          "requirements": ["FR-CLM-01", "FR-CLM-03", "FR-CLM-06"],
+          "acceptance": [
+            "Objects with lookups to Policy/Coverage",
+            "Field History Tracking on status and amounts",
+            "External ID fields"
+          ]
+        },
+        {
+          "title": "Set OWD Private and sharing rules",
+          "type": "feature",
+          "area": "security",
+          "priority": "P1",
+          "size": "S",
+          "start": "2026-12-18",
+          "due": "2026-12-18",
+          "requirements": ["NFR-SEC-01", "FR-POL-04"],
+          "acceptance": [
+            "OWD Private (internal and external) in source",
+            "Sharing rules/role hierarchy for agents and adjusters"
+          ]
+        },
+        {
+          "title": "Create permission sets and permission set groups (Agent, Claims Adjuster, Customer)",
+          "type": "feature",
+          "area": "security",
+          "priority": "P1",
+          "size": "M",
+          "start": "2026-12-21",
+          "due": "2026-12-23",
+          "requirements": ["NFR-SEC-02"],
+          "acceptance": [
+            "Least-privilege object/field permissions",
+            "Permission matrix in `docs/architektura/model-uprawnien.md`",
+            "Minimal profiles"
+          ]
+        },
+        {
+          "title": "Implement Apex selector layer with WITH USER_MODE",
+          "type": "feature",
+          "area": "data-model",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-01-04",
+          "due": "2027-01-06",
+          "requirements": ["NFR-SEC-03", "NFR-SEC-04", "NFR-MNT-02"],
+          "acceptance": [
+            "Selectors for Policy, Coverage, Claim",
+            "All queries `WITH USER_MODE`, bind variables only",
+            "Tests for FLS denial"
+          ]
+        },
+        {
+          "title": "Implement PolicyService and ClaimService",
+          "type": "feature",
+          "area": "data-model",
+          "priority": "P1",
+          "size": "L",
+          "start": "2027-01-07",
+          "due": "2027-01-12",
+          "requirements": [
+            "FR-CLM-01",
+            "FR-CLM-05",
+            "NFR-SEC-03",
+            "NFR-PERF-02"
+          ],
+          "acceptance": [
+            "`with sharing` services, DML in user mode",
+            "Coverage/date validation for new claims",
+            "Payout ≤ sum insured − deductible",
+            "Bulk-safe"
+          ]
+        },
+        {
+          "title": "Add trigger framework and claim status transition handler",
+          "type": "feature",
+          "area": "data-model",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-01-13",
+          "due": "2027-01-15",
+          "requirements": ["FR-CLM-02", "NFR-MNT-02", "NFR-PERF-02"],
+          "acceptance": [
+            "One trigger per object, handler pattern",
+            "Invalid transitions rejected with clear error",
+            "200-record bulk test"
+          ],
+          "adr": true
+        },
+        {
+          "title": "Auto-assign new claims to adjusters",
+          "type": "feature",
+          "area": "data-model",
+          "priority": "P2",
+          "size": "S",
+          "start": "2027-01-18",
+          "due": "2027-01-19",
+          "requirements": ["FR-CLM-04"],
+          "acceptance": [
+            "Queue + assignment logic (Flow or Apex)",
+            "Test coverage"
+          ]
+        },
+        {
+          "title": "Schedule automatic policy expiry",
+          "type": "feature",
+          "area": "data-model",
+          "priority": "P3",
+          "size": "S",
+          "start": "2027-01-19",
+          "due": "2027-01-20",
+          "requirements": ["FR-POL-05"],
+          "acceptance": ["Scheduled Flow or Schedulable Apex", "Test"]
+        },
+        {
+          "title": "Add Apex error logging utility",
+          "type": "feature",
+          "area": "data-model",
+          "priority": "P3",
+          "size": "S",
+          "start": "2027-01-20",
+          "due": "2027-01-20",
+          "requirements": ["NFR-OBS-03"],
+          "acceptance": [
+            "Log object or Platform Event with context, no sensitive data",
+            "Used by services and triggers",
+            "Test"
+          ]
+        },
+        {
+          "title": "Add Restriction Rules for sensitive records",
+          "type": "feature",
+          "area": "security",
+          "priority": "P2",
+          "size": "S",
+          "start": "2027-01-20",
+          "due": "2027-01-21",
+          "requirements": ["NFR-SEC-01", "NFR-SEC-07"],
+          "acceptance": [
+            "Restriction rules in source",
+            "Test with `System.runAs`"
+          ]
+        },
+        {
+          "title": "Create test data factory and sample data plans",
+          "type": "feature",
+          "area": "data-model",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-01-21",
+          "due": "2027-01-25",
+          "requirements": ["NFR-QA-05", "NFR-CMP-02"],
+          "acceptance": [
+            "`TestDataFactory` used by all tests",
+            "Synthetic data plans under `data/` for `sf data import tree`",
+            "Scratch org setup script loads data"
+          ]
+        },
+        {
+          "title": "Write security tests with System.runAs and reach ≥ 85% coverage",
+          "type": "feature",
+          "area": "security",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-01-25",
+          "due": "2027-01-28",
+          "requirements": ["NFR-QA-01", "NFR-SEC-01", "NFR-SEC-03"],
+          "acceptance": [
+            "Positive/negative access tests per persona",
+            "Org-wide coverage ≥ 85%"
+          ]
+        },
+        {
+          "title": "Build Lightning app, layouts and record pages for agents and adjusters",
+          "type": "feature",
+          "area": "data-model",
+          "priority": "P2",
+          "size": "M",
+          "start": "2027-01-28",
+          "due": "2027-01-31",
+          "requirements": ["FR-POL-04", "FR-COM-02"],
+          "acceptance": [
+            "Lightning app, tabs, layouts, dynamic forms where useful",
+            "Screenshots for the thesis"
+          ]
+        }
+      ]
+    },
+    {
+      "milestone": "M3",
+      "title": "[Epic] M3 Experience Cloud customer portal",
+      "area": "portal",
+      "docFile": "docs/implementacja/M3-portal.md",
+      "goal": "Secure LWR portal where insured customers see their policies, submit claims and talk to their agent.",
+      "dod": "LWR site in metadata; LWC: policy list, details, claim submission with documents, agent communication; Sharing Sets; Jest tests.",
+      "tasks": [
+        {
+          "title": "Create LWR site in metadata and deploy it via pipeline",
+          "type": "feature",
+          "area": "portal",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-02-01",
+          "due": "2027-02-04",
+          "requirements": ["FR-PRT-01", "NFR-MNT-01"],
+          "acceptance": [
+            "Site (Network, DigitalExperience) in source",
+            "Deploys to a fresh scratch org in CI",
+            "Guest access disabled for data"
+          ]
+        },
+        {
+          "title": "Provision customer community users with Customer permission set",
+          "type": "feature",
+          "area": "portal",
+          "priority": "P1",
+          "size": "S",
+          "start": "2027-02-04",
+          "due": "2027-02-05",
+          "requirements": ["FR-PRT-01", "NFR-SEC-02"],
+          "acceptance": [
+            "Account/Contact → portal user script for scratch org",
+            "Customer permission set assigned"
+          ]
+        },
+        {
+          "title": "Configure Sharing Sets for customer access to own records",
+          "type": "feature",
+          "area": "security",
+          "priority": "P1",
+          "size": "S",
+          "start": "2027-02-08",
+          "due": "2027-02-09",
+          "requirements": ["NFR-SEC-07"],
+          "acceptance": [
+            "Sharing Sets for Policy, Claim",
+            "Cross-customer access test (negative)"
+          ]
+        },
+        {
+          "title": "LWC: policy list and policy details",
+          "type": "feature",
+          "area": "portal",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-02-09",
+          "due": "2027-02-12",
+          "requirements": ["FR-PRT-02", "NFR-UX-02"],
+          "acceptance": [
+            "Apex controller `with sharing` + USER_MODE",
+            "Coverages shown",
+            "Jest tests"
+          ]
+        },
+        {
+          "title": "LWC: claim submission form with document upload",
+          "type": "feature",
+          "area": "portal",
+          "priority": "P1",
+          "size": "L",
+          "start": "2027-02-15",
+          "due": "2027-02-19",
+          "requirements": ["FR-PRT-03", "FR-CLM-03", "NFR-SEC-10", "NFR-UX-03"],
+          "acceptance": [
+            "Client and server validation",
+            "Upload size and MIME limits",
+            "Jest + Apex tests"
+          ]
+        },
+        {
+          "title": "LWC: claim status tracking",
+          "type": "feature",
+          "area": "portal",
+          "priority": "P1",
+          "size": "S",
+          "start": "2027-02-22",
+          "due": "2027-02-23",
+          "requirements": ["FR-PRT-04"],
+          "acceptance": ["Status path visible", "Jest tests"]
+        },
+        {
+          "title": "Customer-to-agent communication via Case",
+          "type": "feature",
+          "area": "portal",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-02-24",
+          "due": "2027-02-27",
+          "requirements": ["FR-COM-01", "FR-COM-02"],
+          "acceptance": [
+            "Customer opens a question from policy/claim",
+            "Case routed to owning agent",
+            "Replies visible in portal"
+          ]
+        },
+        {
+          "title": "Email notification on claim status change",
+          "type": "feature",
+          "area": "portal",
+          "priority": "P3",
+          "size": "S",
+          "start": "2027-03-01",
+          "due": "2027-03-02",
+          "requirements": ["FR-COM-03"],
+          "acceptance": [
+            "Flow + email template",
+            "No sensitive data in email body"
+          ]
+        },
+        {
+          "title": "Harden portal: guest user, Lightning Web Security, CSP",
+          "type": "feature",
+          "area": "security",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-03-02",
+          "due": "2027-03-05",
+          "requirements": ["NFR-SEC-07", "NFR-SEC-09"],
+          "acceptance": [
+            "Guest profile has no object access",
+            "LWS enabled, CSP trusted sites minimal",
+            "Manual cross-account access test documented"
+          ]
+        },
+        {
+          "title": "Accessibility audit of portal (WCAG 2.1 AA)",
+          "type": "feature",
+          "area": "portal",
+          "priority": "P2",
+          "size": "S",
+          "start": "2027-03-08",
+          "due": "2027-03-09",
+          "requirements": ["NFR-UX-01"],
+          "acceptance": [
+            "axe/Lighthouse report saved",
+            "Issues fixed or listed"
+          ]
+        },
+        {
+          "title": "Reach LWC Jest coverage ≥ 70% and document the portal",
+          "type": "docs",
+          "area": "portal",
+          "priority": "P2",
+          "size": "M",
+          "start": "2027-03-10",
+          "due": "2027-03-14",
+          "requirements": ["NFR-QA-02"],
+          "acceptance": [
+            "Coverage report in CI",
+            "`docs/architektura/portal.md` with screenshots and access model"
+          ]
+        }
+      ]
+    },
+    {
+      "milestone": "M4",
+      "title": "[Epic] M4 Python integration server — historical data loading",
+      "area": "backend",
+      "docFile": "docs/implementacja/M4-backend-python.md",
+      "goal": "Python service that securely loads historical data into Salesforce via Bulk API 2.0 using JWT Bearer, with its own DevSecOps pipeline.",
+      "dod": "`integration-server/`: Bulk API 2.0 loader, JWT Bearer, upsert by External ID, logging and audit; `python-ci.yml` (ruff, pytest, Bandit, pip-audit).",
+      "tasks": [
+        {
+          "title": "Scaffold integration-server (FastAPI, ruff, pytest, pinned dependencies)",
+          "type": "chore",
+          "area": "backend",
+          "priority": "P1",
+          "size": "S",
+          "start": "2027-03-15",
+          "due": "2027-03-16",
+          "requirements": ["NFR-QA-04"],
+          "acceptance": [
+            "Python 3.12 project with lock file",
+            "Health endpoint",
+            "Settings from env vars only"
+          ]
+        },
+        {
+          "title": "Add python-ci workflow with ruff, pytest, Bandit, pip-audit and CodeQL",
+          "type": "feature",
+          "area": "ci",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-03-17",
+          "due": "2027-03-19",
+          "requirements": ["FR-CI-05", "FR-CI-06", "NFR-QA-03"],
+          "acceptance": [
+            "`.github/workflows/python-ci.yml` with path filter",
+            "Coverage ≥ 80% gate",
+            "CodeQL Python language added",
+            "Dependabot pip ecosystem"
+          ]
+        },
+        {
+          "title": "Implement JWT Bearer authentication module",
+          "type": "feature",
+          "area": "security",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-03-22",
+          "due": "2027-03-24",
+          "requirements": ["NFR-SEC-06"],
+          "acceptance": [
+            "Separate integration user and External Client App",
+            "Token cached until expiry, key from secret store",
+            "Unit tests with mocked token endpoint"
+          ]
+        },
+        {
+          "title": "Synthetic historical data generator",
+          "type": "feature",
+          "area": "backend",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-03-25",
+          "due": "2027-03-29",
+          "requirements": ["FR-MIG-04", "NFR-CMP-02"],
+          "acceptance": [
+            "Faker-based customers, policies, coverages, claims",
+            "Deterministic seed",
+            "CSV output matching External ID schema"
+          ]
+        },
+        {
+          "title": "Bulk API 2.0 loader with upsert by External ID",
+          "type": "feature",
+          "area": "backend",
+          "priority": "P1",
+          "size": "L",
+          "start": "2027-03-30",
+          "due": "2027-04-05",
+          "requirements": ["FR-MIG-01", "FR-MIG-02", "NFR-PERF-03"],
+          "acceptance": [
+            "Ordered load (parents before children)",
+            "Upsert by External ID, idempotent re-runs",
+            "Retry with backoff, resumable jobs",
+            "Tested on scratch org with 100k records"
+          ]
+        },
+        {
+          "title": "Report rejected records and produce audit report",
+          "type": "feature",
+          "area": "backend",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-04-06",
+          "due": "2027-04-08",
+          "requirements": ["FR-MIG-03", "NFR-OBS-01"],
+          "acceptance": [
+            "Failed results downloaded with reasons",
+            "Run summary (counts, durations) as JSON",
+            "Structured logs without PII"
+          ]
+        },
+        {
+          "title": "Integration tests of loader against scratch org in CI",
+          "type": "feature",
+          "area": "ci",
+          "priority": "P2",
+          "size": "M",
+          "start": "2027-04-12",
+          "due": "2027-04-15",
+          "requirements": ["FR-MIG-01"],
+          "acceptance": [
+            "Optional workflow job using scratch org",
+            "Small dataset loaded and verified by SOQL"
+          ]
+        },
+        {
+          "title": "Write runbook and document integration security",
+          "type": "docs",
+          "area": "backend",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-04-19",
+          "due": "2027-04-25",
+          "requirements": ["NFR-MNT-03", "NFR-MNT-05"],
+          "acceptance": [
+            "`integration-server/README.md` runbook",
+            "Sequence diagram JWT → Bulk API in `docs/architektura/`",
+            "ADR: Bulk API 2.0 vs REST composite"
+          ],
+          "adr": true
+        }
+      ]
+    },
+    {
+      "milestone": "M5",
+      "title": "[Epic] M5 External Objects — data residency via OData",
+      "area": "external-objects",
+      "docFile": "docs/implementacja/M5-external-objects.md",
+      "goal": "Show sensitive external data in Salesforce and the portal without storing it in the CRM.",
+      "dod": "OData 4.0 endpoint in FastAPI; HTTPS hosting; External Data Source + Named/External Credential; data displayed in portal without being stored in CRM.",
+      "tasks": [
+        {
+          "title": "Implement OData 4.0 endpoint for payment history",
+          "type": "feature",
+          "area": "external-objects",
+          "priority": "P1",
+          "size": "L",
+          "start": "2027-04-26",
+          "due": "2027-04-30",
+          "requirements": ["FR-EXT-01", "NFR-PERF-04"],
+          "acceptance": [
+            "`$metadata`, entity set, `$filter`, `$top`, `$skip`, `$count`",
+            "Pagination",
+            "Contract tests (pytest)"
+          ]
+        },
+        {
+          "title": "Secure the OData endpoint (authentication and per-customer filtering)",
+          "type": "feature",
+          "area": "security",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-05-03",
+          "due": "2027-05-05",
+          "requirements": ["NFR-SEC-08", "FR-EXT-03"],
+          "acceptance": [
+            "Auth scheme chosen (OAuth/JWT or per-user auth) and documented",
+            "Rate limiting, input validation",
+            "Bandit clean"
+          ],
+          "adr": true
+        },
+        {
+          "title": "Deploy backend to HTTPS hosting",
+          "type": "chore",
+          "area": "backend",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-05-06",
+          "due": "2027-05-10",
+          "requirements": ["NFR-SEC-08"],
+          "acceptance": [
+            "Public HTTPS URL (Render / Azure App Service / Cloudflare Tunnel)",
+            "Secrets from platform secret store",
+            "Deploy automated from main"
+          ]
+        },
+        {
+          "title": "Create External Data Source and Named/External Credential in metadata",
+          "type": "feature",
+          "area": "external-objects",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-05-11",
+          "due": "2027-05-13",
+          "requirements": ["FR-EXT-02", "NFR-SEC-08"],
+          "acceptance": [
+            "Metadata in source, secrets not committed",
+            "Sync creates External Object",
+            "Fallback per spike if Connect unavailable"
+          ]
+        },
+        {
+          "title": "Show external payment history in portal and Lightning with access control",
+          "type": "feature",
+          "area": "portal",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-05-17",
+          "due": "2027-05-20",
+          "requirements": ["FR-PRT-05", "FR-EXT-03", "NFR-CMP-01"],
+          "acceptance": [
+            "Related list / LWC on policy",
+            "Customer sees only own records",
+            "Proof that no rows are stored in CRM"
+          ]
+        },
+        {
+          "title": "Measure OData performance",
+          "type": "research",
+          "area": "experiment",
+          "priority": "P3",
+          "size": "S",
+          "start": "2027-05-24",
+          "due": "2027-05-25",
+          "requirements": ["NFR-PERF-04"],
+          "acceptance": [
+            "Latency for 10/100 rows measured",
+            "Results in `docs/experiment/results/`"
+          ]
+        },
+        {
+          "title": "Write ADR on data residency and document External Objects",
+          "type": "docs",
+          "area": "external-objects",
+          "priority": "P1",
+          "size": "S",
+          "start": "2027-05-26",
+          "due": "2027-05-31",
+          "requirements": ["NFR-CMP-01", "NFR-MNT-03"],
+          "acceptance": [
+            "ADR data residency (External Objects vs replication)",
+            "Architecture diagram updated"
+          ],
+          "adr": true
+        }
+      ]
+    },
+    {
+      "milestone": "M6",
+      "title": "[Epic] M6 Experiment & hardening — code freeze",
+      "area": "experiment",
+      "docFile": "docs/implementacja/M6-eksperyment.md",
+      "goal": "Measure effectiveness of the DevSecOps gates with intentionally vulnerable changes, fix findings and freeze the code.",
+      "dod": "Experiment results (TP/FN/FP, pipeline time, local vs PR) in `docs/experiment/`; fixes applied; tag v1.0.0 on 15.06.2027.",
+      "tasks": [
+        {
+          "title": "Prepare catalog of 20–30 intentionally vulnerable changes",
+          "type": "research",
+          "area": "experiment",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-05-24",
+          "due": "2027-06-02",
+          "requirements": ["FR-CI-04", "FR-CI-05"],
+          "acceptance": [
+            "`docs/experiment/catalog.md`: SOQL injection, missing CRUD/FLS, without sharing, hardcoded secret, vulnerable npm/pip dependency, LWC XSS, SOQL in loop",
+            "Expected detecting gate for each",
+            "Patches stored on `experiment/*` branches"
+          ]
+        },
+        {
+          "title": "Automate opening experiment PRs and collecting gate results",
+          "type": "feature",
+          "area": "experiment",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-06-01",
+          "due": "2027-06-04",
+          "requirements": ["NFR-OBS-02"],
+          "acceptance": [
+            "Script opens PRs and pulls job results/durations via GitHub API",
+            "Also runs pre-commit locally per change",
+            "CSV in `docs/experiment/results/`"
+          ]
+        },
+        {
+          "title": "Run the experiment and record TP/FN/FP and pipeline time",
+          "type": "research",
+          "area": "experiment",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-06-05",
+          "due": "2027-06-08",
+          "requirements": ["NFR-PERF-01"],
+          "acceptance": [
+            "All catalog items executed",
+            "Confusion matrix per gate",
+            "Local vs PR vs undetected comparison"
+          ]
+        },
+        {
+          "title": "Analyse results with charts",
+          "type": "research",
+          "area": "experiment",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-06-08",
+          "due": "2027-06-11",
+          "requirements": [],
+          "acceptance": [
+            "`docs/experiment/analysis.md` with charts",
+            "Discussion vs Bavadiya 2022 and IEEE/ACM 2022 (SAST false negatives)"
+          ]
+        },
+        {
+          "title": "Hardening: fix findings and run final security review",
+          "type": "feature",
+          "area": "security",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-06-09",
+          "due": "2027-06-14",
+          "requirements": ["NFR-SEC-03"],
+          "acceptance": [
+            "Open Code Analyzer/CodeQL/Dependabot alerts resolved or justified",
+            "OWASP Top 10 checklist filled"
+          ]
+        },
+        {
+          "title": "Code freeze: tag v1.0.0 and record demo video",
+          "type": "chore",
+          "area": "repo",
+          "priority": "P1",
+          "size": "S",
+          "start": "2027-06-15",
+          "due": "2027-06-15",
+          "requirements": [],
+          "acceptance": [
+            "Tag `v1.0.0` and GitHub release",
+            "Demo video of the main flows (fallback for defense)"
+          ]
+        }
+      ]
+    },
+    {
+      "milestone": "M7",
+      "title": "[Epic] M7 Thesis writing",
+      "area": "thesis",
+      "docFile": "docs/implementacja/README.md",
+      "goal": "Write the thesis in parallel with implementation; finalize after code freeze.",
+      "dod": "All chapters written, reviewed by supervisor, formatted according to faculty guidelines.",
+      "tasks": [
+        {
+          "title": "Chapter: Introduction — motivation, goal, scope",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P2",
+          "size": "M",
+          "start": "2026-11-02",
+          "due": "2026-11-30",
+          "requirements": [],
+          "acceptance": ["Draft based on RAPORT.md sections 1–2"]
+        },
+        {
+          "title": "Chapter: Security of cloud CRM and Zero-Trust in Salesforce",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P1",
+          "size": "L",
+          "start": "2026-11-16",
+          "due": "2026-12-20",
+          "requirements": [],
+          "acceptance": [
+            "Multi-tenancy, shared responsibility, Zero-Trust (Al Kalach 2025)",
+            "Platform security mechanisms (OWD, PS, FLS, sharing)"
+          ]
+        },
+        {
+          "title": "Chapter: DevSecOps and CI/CD — shift-left, SAST, secrets, supply chain",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P1",
+          "size": "L",
+          "start": "2026-12-01",
+          "due": "2027-01-17",
+          "requirements": [],
+          "acceptance": [
+            "Bavadiya 2022, Cheenepalli 2025, IEEE 2025 SLR, Jammeh 2020, Shift Left 2025, IEEE/ACM 2022, Lakade 2025"
+          ]
+        },
+        {
+          "title": "Chapter: Ephemeral environments and integration security (JWT, OAuth, External Objects)",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-01-04",
+          "due": "2027-01-31",
+          "requirements": [],
+          "acceptance": [
+            "Scratch orgs (Guduru 2023, SF DX Guide)",
+            "JWT/OAuth 2.0 (Machapatri 2020), data residency"
+          ]
+        },
+        {
+          "title": "Chapter: Requirements and system design",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P1",
+          "size": "L",
+          "start": "2027-02-01",
+          "due": "2027-03-14",
+          "requirements": [],
+          "acceptance": [
+            "From WYMAGANIA.md, ADRs and docs/architektura",
+            "Diagrams: ERD, architecture, pipeline, permissions"
+          ]
+        },
+        {
+          "title": "Chapter: Implementation",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P1",
+          "size": "L",
+          "start": "2027-06-16",
+          "due": "2027-07-15",
+          "requirements": [],
+          "acceptance": [
+            "Built from docs/implementacja M0–M6 entries",
+            "Key code listings and screenshots"
+          ]
+        },
+        {
+          "title": "Chapter: Experiment results and discussion",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P1",
+          "size": "L",
+          "start": "2027-06-16",
+          "due": "2027-07-31",
+          "requirements": [],
+          "acceptance": [
+            "Methodology, results, threats to validity",
+            "Comparison with literature"
+          ]
+        },
+        {
+          "title": "Chapter: Summary and conclusions",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-08-01",
+          "due": "2027-08-10",
+          "requirements": [],
+          "acceptance": ["Goals vs results, further work"]
+        },
+        {
+          "title": "Abstracts (PL/EN), keywords, bibliography and formatting",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-08-05",
+          "due": "2027-08-20",
+          "requirements": [],
+          "acceptance": [
+            "Faculty template and citation style",
+            "All sources from RAPORT.md + official docs + OWASP"
+          ]
+        },
+        {
+          "title": "Supervisor review and corrections",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P1",
+          "size": "L",
+          "start": "2027-08-15",
+          "due": "2027-08-31",
+          "requirements": [],
+          "acceptance": ["Full draft sent", "Feedback applied"]
+        }
+      ]
+    },
+    {
+      "milestone": "M8",
+      "title": "[Epic] M8 Submission & defense",
+      "area": "thesis",
+      "docFile": "docs/implementacja/README.md",
+      "goal": "Submit the thesis and prepare the defense.",
+      "dod": "Thesis submitted, presentation and demo ready, defense passed.",
+      "tasks": [
+        {
+          "title": "Submit thesis (anti-plagiarism check and university system)",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P1",
+          "size": "S",
+          "start": "2027-09-01",
+          "due": "2027-09-10",
+          "requirements": [],
+          "acceptance": ["JSA check passed", "Uploaded to USOS/APD"]
+        },
+        {
+          "title": "Prepare defense presentation and live demo script",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P1",
+          "size": "M",
+          "start": "2027-09-06",
+          "due": "2027-09-20",
+          "requirements": [],
+          "acceptance": [
+            "15-minute presentation",
+            "Demo script + recorded fallback video",
+            "Fresh scratch org ready day before"
+          ]
+        },
+        {
+          "title": "Revise diploma exam questions and run mock defense",
+          "type": "thesis",
+          "area": "thesis",
+          "priority": "P2",
+          "size": "M",
+          "start": "2027-09-13",
+          "due": "2027-09-27",
+          "requirements": [],
+          "acceptance": ["Notes for exam question list", "Mock defense done"]
+        }
+      ]
+    }
+  ]
+}

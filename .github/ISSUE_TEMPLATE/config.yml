@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Working conventions (PL)
+    url: https://github.com/Yibux/insurance-app/blob/main/docs/KONWENCJE.md
+    about: Branching, commits, Definition of Done and documentation rules.

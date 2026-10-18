@@ -1,0 +1,33 @@
+name: Epic
+description: One per stage (milestone); groups tasks as sub-issues.
+labels: ["type:epic"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+    validations:
+      required: true
+  - type: textarea
+    id: dod
+    attributes:
+      label: Stage Definition of Done
+      description: Copy from docs/HARMONOGRAM.md.
+    validations:
+      required: true
+  - type: input
+    id: requirements
+    attributes:
+      label: Requirements covered
+  - type: textarea
+    id: docs
+    attributes:
+      label: Documentation deliverables
+      value: |
+        - [ ] `docs/implementacja/M<n>-*.md` complete
+        - [ ] ADRs for stage decisions
+        - [ ] Thesis draft section (1–2 pages)
+  - type: textarea
+    id: summary
+    attributes:
+      label: Stage summary (fill when closing)

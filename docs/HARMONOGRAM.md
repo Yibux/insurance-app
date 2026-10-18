@@ -1,7 +1,8 @@
 # Harmonogram i plan realizacji pracy
 
 - **Temat:** Projekt i implementacja bezpiecznego systemu obsługi ubezpieczeń z wykorzystaniem metodyki DevSecOps w ekosystemie Salesforce
-- **Wymagania i literatura:** [RAPORT.md](RAPORT.md)
+- **Temat i literatura:** [RAPORT.md](RAPORT.md)
+- **Wymagania:** [WYMAGANIA.md](WYMAGANIA.md) · **Zadania:** [BACKLOG.md](BACKLOG.md) / GitHub Project · **Konwencje:** [KONWENCJE.md](KONWENCJE.md)
 
 ## Założenia
 
@@ -67,7 +68,7 @@ insurance-app/
 - po każdym etapie: 1–2 strony opisu implementacji i decyzje w `docs/adr/`;
 - czerwiec: wyniki eksperymentu.
 
-Rytm pracy: co 2 tygodnie przegląd postępu (issue/milestone na GitHub per etap).
+Rytm pracy: co 2 tygodnie przegląd postępu (milestone + epik na GitHub per etap, szczegóły w [KONWENCJE.md](KONWENCJE.md)).
 
 ---
 

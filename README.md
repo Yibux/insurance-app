@@ -6,6 +6,10 @@ The master's repository — an insurance application built on the Salesforce pla
 
 - [docs/RAPORT.md](docs/RAPORT.md) — thesis report: topic, scope, literature review
 - [docs/HARMONOGRAM.md](docs/HARMONOGRAM.md) — work schedule, tech stack, research plan
+- [docs/WYMAGANIA.md](docs/WYMAGANIA.md) — functional and non-functional requirements, traceability matrix
+- [docs/KONWENCJE.md](docs/KONWENCJE.md) — workflow, Definition of Done, documentation rules
+- [docs/BACKLOG.md](docs/BACKLOG.md) — epics and tasks (generated from [scripts/github/backlog.json](scripts/github/backlog.json))
+- [docs/adr/](docs/adr/), [docs/implementacja/](docs/implementacja/) — decisions and implementation log
 
 ## Structure
 
