@@ -1,0 +1,28 @@
+name: Spike
+description: Time-boxed investigation that ends with a go / no-go note.
+labels: ["type:spike"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Question to answer
+    validations:
+      required: true
+  - type: input
+    id: timebox
+    attributes:
+      label: Time-box
+      placeholder: e.g. 1 day
+    validations:
+      required: true
+  - type: textarea
+    id: approach
+    attributes:
+      label: Approach
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Expected outcome
+      value: |
+        - [ ] Note in `docs/spikes/<slug>.md` with verdict (go / no-go / workaround)
+        - [ ] Follow-up tasks created or backlog adjusted

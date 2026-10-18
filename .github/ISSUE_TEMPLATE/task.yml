@@ -1,0 +1,52 @@
+name: Task
+description: A unit of work (0.5–3 days) that ends with code and documentation.
+labels: ["type:feature"]
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why this task exists; link the parent epic.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is in and out of scope.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - [ ]
+    validations:
+      required: true
+  - type: input
+    id: requirements
+    attributes:
+      label: Requirements
+      description: Requirement IDs from docs/WYMAGANIA.md, e.g. FR-CLM-02, NFR-SEC-03.
+  - type: textarea
+    id: docs
+    attributes:
+      label: Documentation to update
+      value: |
+        - [ ] Implementation log entry in `docs/implementacja/M<n>-*.md`
+        - [ ] ADR in `docs/adr/` (if a decision was made)
+        - [ ] README / runbook (if setup changes)
+  - type: input
+    id: thesis
+    attributes:
+      label: Thesis link
+      description: Thesis chapter and literature this task feeds.
+  - type: checkboxes
+    id: dod
+    attributes:
+      label: Definition of Done
+      options:
+        - label: Acceptance criteria met, tests added, CI green
+        - label: Implementation log entry written (what / how / decisions / problems / evidence)
+        - label: Requirement IDs listed and traceability matrix still valid

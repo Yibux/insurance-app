@@ -1,0 +1,27 @@
+name: Thesis chapter
+description: Writing work on the thesis (written in Polish).
+labels: ["type:thesis", "area:thesis"]
+body:
+  - type: input
+    id: chapter
+    attributes:
+      label: Chapter / section
+    validations:
+      required: true
+  - type: textarea
+    id: content
+    attributes:
+      label: Planned content
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources
+      description: Literature from docs/RAPORT.md and docs/implementacja entries.
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      value: |
+        - [ ] Draft written in `Praca Magisterska.docx`
+        - [ ] Figures/tables prepared
+        - [ ] Sent to supervisor / feedback applied
