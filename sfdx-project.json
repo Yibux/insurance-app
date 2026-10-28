@@ -8,5 +8,12 @@
   "name": "insurance-app",
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "62.0"
+  "sourceApiVersion": "68.0",
+  "replacements": [
+    {
+      "glob": "force-app/main/default/sites/*.site-meta.xml",
+      "stringToReplace": "__SITE_ADMIN_USERNAME__",
+      "replaceWithEnv": "SF_SITE_ADMIN_USERNAME"
+    }
+  ]
 }
