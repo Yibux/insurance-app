@@ -39,3 +39,13 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 - **Problemy:** brak.
 - **Dowody:** pliki ADR w repozytorium.
 - **Do pracy:** rozdział #85 (wymagania i projekt systemu) — uzasadnienie architektury i modelu danych; ograniczenia zakresu (brak FSC) w podsumowaniu (#88).
+
+### #9 Spike: Salesforce Connect OData 4.0 availability in DE/scratch
+
+- **Data:** 2026-10-29 · **PR:** #<nr> · **Wymagania:** FR-EXT-02
+- **Co zrobiono:** Sprawdzono, że Salesforce Connect z adapterem OData 4.0 działa w Developer Edition (walidacja deployu) i w scratch orgu (pełny deploy i zapytanie SOQL zwracające dane z publicznego serwisu Northwind). Werdykt: GO, bez zmian w definicji scratch orga.
+- **Jak:** metadane testowe w `spikes/salesforce-connect-odata/` (ExternalDataSource `OData4`, obiekt `Customers__x`, permission set); `sf project deploy start --metadata-dir …` (DE z `--dry-run`); `SELECT … FROM Customers__x`.
+- **Decyzje i alternatywy:** spike w formacie Metadata API poza `force-app/`, żeby testowe źródło danych nie trafiło do aplikacji. Fallback (Apex callout + LWC) opisany, ale niepotrzebny.
+- **Problemy:** `externalDeveloperName` zamiast `externalName` w polach obiektu zewnętrznego; brak FLS po deployu — wymagany permission set. Szczegóły: [spike](../spikes/salesforce-connect-odata.md).
+- **Dowody:** walidacja w DE: Succeeded; deploy do scratch orga: Succeeded; zapytanie zwróciło 5 rekordów (`AROUT`, `BSBEV`, `CONSH`, `EASTC`, `NORTS`); limit `HourlyODataCallout` 1000/h.
+- **Do pracy:** rozdział #84 (External Objects — dane bez przechowywania w CRM), #86 (implementacja M5); argument za modelem Data Residency z RAPORT.md.

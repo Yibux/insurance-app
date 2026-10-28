@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <deploymentStatus>Deployed</deploymentStatus>
+    <externalDataSource>Northwind</externalDataSource>
+    <externalName>Customers</externalName>
+    <fields>
+        <fullName>CompanyName__c</fullName>
+        <externalDeveloperName>CompanyName</externalDeveloperName>
+        <label>Company Name</label>
+        <length>40</length>
+        <type>Text</type>
+    </fields>
+    <fields>
+        <fullName>City__c</fullName>
+        <externalDeveloperName>City</externalDeveloperName>
+        <label>City</label>
+        <length>15</length>
+        <type>Text</type>
+    </fields>
+    <label>Customer</label>
+    <pluralLabel>Customers</pluralLabel>
+</CustomObject>
