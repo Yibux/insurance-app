@@ -43,3 +43,10 @@ sfca_results.json
 
 # Local environment variables
 .env
+
+# Private keys and certificates (JWT for CI lives outside the repo)
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
