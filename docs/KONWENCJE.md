@@ -97,6 +97,7 @@ Sekcje „Decyzje”, „Problemy” i „Do pracy” są najcenniejsze przy pis
 | `docs/spikes/`        | Wyniki spike'ów                                                             |
 | `docs/experiment/`    | Katalog podatnych zmian, surowe wyniki, analiza                             |
 | `docs/architektura/`  | Diagramy (ERD, przepływy, potok CI/CD) — Mermaid lub PlantUML               |
+| `docs/runbooki/`      | Procedury operacyjne (rotacja certyfikatów, odtwarzanie środowisk)          |
 
 ---
 
