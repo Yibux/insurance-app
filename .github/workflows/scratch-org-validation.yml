@@ -1,0 +1,100 @@
+name: Scratch org validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "force-app/**"
+      - "config/**"
+      - "sfdx-project.json"
+      - ".github/workflows/scratch-org-validation.yml"
+
+permissions:
+  contents: read
+
+# A newer push to the same PR cancels the running validation; the cleanup
+# steps still run because they use `always()`.
+concurrency:
+  group: scratch-org-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  SF_CLI_VERSION: 2.156.8
+  SF_DISABLE_TELEMETRY: true
+  SF_AUTOUPDATE_DISABLE: true
+
+jobs:
+  deploy:
+    name: Deploy to scratch org
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: devhub
+    # One scratch org job at a time across the repository: Developer Edition
+    # allows 3 active and 6 new scratch orgs per day.
+    concurrency:
+      group: devhub-scratch-org
+      cancel-in-progress: false
+    env:
+      SCRATCH_ALIAS: pr-${{ github.event.pull_request.number }}-${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Install Salesforce CLI
+        run: |
+          npm install --global --ignore-scripts "@salesforce/cli@${SF_CLI_VERSION}"
+          sf --version
+
+      - name: Authenticate to Dev Hub (JWT Bearer)
+        env:
+          SF_JWT_KEY: ${{ secrets.SF_JWT_KEY }}
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+        run: |
+          umask 077
+          printf '%s\n' "$SF_JWT_KEY" > "$RUNNER_TEMP/devhub.key"
+          sf org login jwt \
+            --client-id "$SF_CLIENT_ID" \
+            --jwt-key-file "$RUNNER_TEMP/devhub.key" \
+            --username "$SF_USERNAME" \
+            --alias devhub \
+            --set-default-dev-hub > /dev/null
+          rm -f "$RUNNER_TEMP/devhub.key"
+          echo "Authenticated to Dev Hub."
+
+      - name: Create scratch org
+        run: |
+          sf org create scratch \
+            --definition-file config/project-scratch-def.json \
+            --alias "$SCRATCH_ALIAS" \
+            --target-dev-hub devhub \
+            --duration-days 1 \
+            --wait 20 > /dev/null
+          username=$(sf org display --target-org "$SCRATCH_ALIAS" --json | jq -r '.result.username')
+          echo "SF_SITE_ADMIN_USERNAME=${username}" >> "$GITHUB_ENV"
+          echo "Scratch org ${SCRATCH_ALIAS} created."
+
+      - name: Deploy source
+        run: sf project deploy start --target-org "$SCRATCH_ALIAS" --wait 30
+
+      - name: Delete scratch org
+        if: always()
+        run: |
+          if sf org display --target-org "$SCRATCH_ALIAS" > /dev/null 2>&1; then
+            sf org delete scratch --target-org "$SCRATCH_ALIAS" --no-prompt
+          else
+            echo "No scratch org to delete."
+          fi
+
+      - name: Remove credentials
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/devhub.key"
+          sf org logout --all --no-prompt > /dev/null 2>&1 || true
