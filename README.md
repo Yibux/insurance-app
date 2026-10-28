@@ -26,9 +26,12 @@ Requirements: [Salesforce CLI](https://developer.salesforce.com/tools/salesforce
 npm install
 sf org login web --set-default-dev-hub --alias devhub
 sf org create scratch --definition-file config/project-scratch-def.json --alias insurance-app --set-default --duration-days 30
+export SF_SITE_ADMIN_USERNAME=$(sf org display --json | jq -r .result.username)
 sf project deploy start
 sf org open
 ```
+
+`SF_SITE_ADMIN_USERNAME` is substituted into the Experience Cloud site metadata (`siteAdmin`, guest record owner) at deploy time — see `replacements` in `sfdx-project.json`.
 
 ## Useful commands
 
