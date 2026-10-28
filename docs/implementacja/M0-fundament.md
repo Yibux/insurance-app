@@ -29,3 +29,13 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 - **Problemy:** nazwa użytkownika scratch orga w `CustomSite`; prywatny e-mail w `Network`; błąd schematu `geoBotsAllowed` przy deployu w API 62.0. Szczegóły: [spike](../spikes/experience-cloud-lwr.md).
 - **Dowody:** deploy `0AfO500000fvtMjKAI` do `spike-lwr-2`: Succeeded, 31/31 komponentów; `sf community publish` zakończony powodzeniem. <!-- zrzut opublikowanej strony -->
 - **Do pracy:** rozdział #85/#86 (projekt i implementacja portalu), #84 (efemeryczne środowiska — infrastruktura jako kod także dla warstwy UI).
+
+### #10 ADR-001 monorepo and ADR-002 custom objects instead of Financial Services Cloud
+
+- **Data:** 2026-10-29 · **PR:** #<nr> · **Wymagania:** NFR-MNT-03
+- **Co zrobiono:** Spisano dwie decyzje podjęte przy planowaniu: jedno repozytorium dla metadanych Salesforce, backendu Python i CI/CD oraz własny model danych zamiast obiektów Financial Services Cloud. Uzupełniono indeks ADR.
+- **Jak:** [ADR 0001](../adr/0001-monorepo.md), [ADR 0002](../adr/0002-custom-objects-vs-fsc.md), indeks w `docs/adr/README.md`.
+- **Decyzje i alternatywy:** monorepo vs osobne repozytoria vs Unlocked Packages; obiekty custom vs FSC vs obiekty standardowe (`Asset`/`Case`). Obiekty custom nazwane i powiązane analogicznie do FSC, aby ewentualna migracja była mapowaniem.
+- **Problemy:** brak.
+- **Dowody:** pliki ADR w repozytorium.
+- **Do pracy:** rozdział #85 (wymagania i projekt systemu) — uzasadnienie architektury i modelu danych; ograniczenia zakresu (brak FSC) w podsumowaniu (#88).
