@@ -6,7 +6,7 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 
 ### #14 Create pr-validation workflow: lint, Prettier check and LWC Jest
 
-- **Data:** 2026-10-29 · **PR:** #<nr> · **Wymagania:** FR-CI-01, NFR-QA-04
+- **Data:** 2026-10-29 · **PR:** #100 · **Wymagania:** FR-CI-01, NFR-QA-04
 - **Co zrobiono:** Dodano pierwszy workflow GitHub Actions `pr-validation.yml`, uruchamiany dla każdego PR do `main`. Job `static-checks` wykonuje ESLint (LWC/Aura), sprawdzenie formatowania Prettierem i testy LWC Jest; błąd dowolnego kroku oblewa PR.
 - **Jak:** `.github/workflows/pr-validation.yml`; `actions/setup-node` z cache npm; `npm ci --ignore-scripts`; skrypty `npm run lint`, `npm run prettier:verify`, `npm run test:unit -- --ci`.
 - **Decyzje i alternatywy:**
@@ -21,19 +21,19 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 
 ### #15 Authenticate CI to Dev Hub with JWT Bearer Flow
 
-- **Data:** 2026-10-29 · **PR:** #<nr> · **Wymagania:** NFR-SEC-05, NFR-SEC-06
+- **Data:** 2026-10-29 · **PR:** #101 · **Wymagania:** NFR-SEC-05, NFR-SEC-06
 - **Co zrobiono:** Workflow `scratch-org-validation.yml` loguje się do Dev Hubu przez JWT Bearer Flow z użyciem sekretów środowiska `devhub` (konfiguracja z #7). Klucz prywatny istnieje na dysku runnera tylko na czas logowania.
 - **Jak:** job z `environment: devhub`; klucz zapisywany do `$RUNNER_TEMP/devhub.key` z `umask 077`, `sf org login jwt …`, natychmiastowe `rm`, a dodatkowo `rm` i `sf org logout --all` w krokach `if: always()`. Wyjście komend logowania przekierowane do `/dev/null`; sekrety są dodatkowo maskowane przez GitHub.
 - **Decyzje i alternatywy:** sekrety środowiska zamiast repozytorium ([ADR 0003](../adr/0003-jwt-bearer-ci-auth.md)); wersja `sf` CLI przypięta (`SF_CLI_VERSION`) i instalowana z `--ignore-scripts`; wyłączona telemetria i autoaktualizacja CLI.
 - **Problemy:**
   - kontekst `runner` nie jest dostępny w `env` na poziomie joba — ścieżka klucza przez zmienną powłoki `$RUNNER_TEMP`;
   - pierwszy przebieg: `client identifier invalid` — w sekrecie `SF_CLIENT_ID` była zła wartość; poprawiono na Consumer Key aplikacji i potwierdzono lokalnym `sf org login jwt`.
-- **Dowody:** <!-- link do przebiegu: krok „Authenticate to Dev Hub (JWT Bearer)” bez danych uwierzytelniających w logu -->
+- **Dowody:** [przebieg 41359225427](https://github.com/Yibux/insurance-app/actions/runs/41359225427) — krok „Authenticate to Dev Hub (JWT Bearer)” zielony w 3 s, sekrety w logu widoczne wyłącznie jako `***`.
 - **Do pracy:** rozdział #84 (JWT w CI), #83 (zarządzanie sekretami w potoku).
 
 ### #16 Create, deploy to and always delete a scratch org per PR
 
-- **Data:** 2026-10-29 · **PR:** #<nr> · **Wymagania:** FR-CI-02, NFR-PERF-05
+- **Data:** 2026-10-29 · **PR:** #101 · **Wymagania:** FR-CI-02, NFR-PERF-05
 - **Co zrobiono:** Dla każdego PR zmieniającego metadane Salesforce powstaje efemeryczny scratch org (1 dzień, unikalny alias), do którego wdrażane są źródła; błąd deployu oblewa job. Org jest usuwany w kroku `always()`, także po błędzie lub anulowaniu.
 - **Jak:** `.github/workflows/scratch-org-validation.yml`: `sf org create scratch --duration-days 1`, alias `pr-<nr>-<run_id>-<attempt>`; `SF_SITE_ADMIN_USERNAME` ustawiana z `sf org display` (wymóg ze spike'a #8); `sf project deploy start`; `sf org delete scratch` w `if: always()`.
 - **Decyzje i alternatywy:**
@@ -41,5 +41,5 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
   - Dwa poziomy `concurrency`: per PR z `cancel-in-progress` (nowy push anuluje stary przebieg) oraz globalna grupa `devhub-scratch-org` na poziomie joba — w danej chwili działa najwyżej jeden job tworzący scratch org (limit 3 aktywnych).
   - Alternatywa: pula długo żyjących scratch orgów współdzielona między PR-ami — odrzucona, bo łamie izolację (stan z poprzedniego PR) i główną tezę o środowiskach efemerycznych.
 - **Problemy:** `sf org create scratch` z Dev Hubem zalogowanym przez External Client App kończył się błędem `The callback URL provided is not valid` (lokalnie: `RemoteOrgSignupFailed`, kod C-1016) — serwis zakładania scratch orgów nie replikuje ECA do nowego orga. Obejście: `SF_SCRATCH_SIGNUP_CONNECTED_APP=PlatformCLI` i `SF_SCRATCH_SIGNUP_CALLBACK_URL=http://localhost:1717/OauthRedirect` w kroku tworzenia orga — przy zakładaniu orga używana jest wbudowana aplikacja CLI, a dostęp do Dev Hubu nadal idzie przez naszą ECA i JWT.
-- **Dowody:** <!-- link do przebiegu: czasy kroków create / deploy / delete -->
+- **Dowody:** [przebieg 41359225427](https://github.com/Yibux/insurance-app/actions/runs/41359225427): instalacja CLI 16 s, logowanie 3 s, utworzenie scratch orga 20 s, deploy (w tym strona Experience Cloud) 30 s, usunięcie orga 4 s — cały job ok. 1 min 20 s.
 - **Do pracy:** rozdział #84 (środowiska efemeryczne), pomiar czasu potoku w eksperymencie (M6, NFR-PERF-05).
