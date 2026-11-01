@@ -43,3 +43,23 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 - **Problemy:** `sf org create scratch` z Dev Hubem zalogowanym przez External Client App kończył się błędem `The callback URL provided is not valid` (lokalnie: `RemoteOrgSignupFailed`, kod C-1016) — serwis zakładania scratch orgów nie replikuje ECA do nowego orga. Obejście: `SF_SCRATCH_SIGNUP_CONNECTED_APP=PlatformCLI` i `SF_SCRATCH_SIGNUP_CALLBACK_URL=http://localhost:1717/OauthRedirect` w kroku tworzenia orga — przy zakładaniu orga używana jest wbudowana aplikacja CLI, a dostęp do Dev Hubu nadal idzie przez naszą ECA i JWT.
 - **Dowody:** [przebieg 41359225427](https://github.com/Yibux/insurance-app/actions/runs/41359225427): instalacja CLI 16 s, logowanie 3 s, utworzenie scratch orga 20 s, deploy (w tym strona Experience Cloud) 30 s, usunięcie orga 4 s — cały job ok. 1 min 20 s.
 - **Do pracy:** rozdział #84 (środowiska efemeryczne), pomiar czasu potoku w eksperymencie (M6, NFR-PERF-05).
+
+### #17 Run Apex tests and enforce 75% coverage gate (check_coverage.py)
+
+- **Data:** 2026-11-02 · **PR:** #102 · **Wymagania:** FR-CI-03, NFR-QA-01
+- **Co zrobiono:** Po deployu do scratch orga workflow uruchamia testy Apex z pokryciem kodu i przepuszcza wynik przez własną bramkę `scripts/ci/check_coverage.py`. Bramka oblewa PR przy nieudanych testach lub pokryciu poniżej progu (domyślnie 75%, zmienna `COVERAGE_THRESHOLD`). Surowy wynik trafia do artefaktu `apex-test-results`, a tabela pokrycia do podsumowania joba.
+- **Jak:**
+  - `sf apex run test --class-names … --code-coverage --output-dir … --json`; kod wyjścia 100 (nieudane testy) przekazywany do bramki, inne błędy przerywają job.
+  - `check_coverage.py <raport> --source-dir force-app` — pokrycie liczone ważone liniami (suma pokrytych / suma linii), opcje `--threshold`, `--per-class-threshold`, `--exclude`, `--fail-on-empty`; tabela Markdown do `$GITHUB_STEP_SUMMARY`.
+  - 16 testów jednostkowych skryptu (`unittest`, bez zależności) uruchamianych w `pr-validation.yml`.
+- **Decyzje i alternatywy:**
+  - Własna bramka zamiast polegania na platformie — Salesforce egzekwuje 75% tylko przy deployu na produkcję, w scratch orgu nie.
+  - Uruchamiane są tylko testy z repozytorium (`--class-names`), a liczone tylko klasy z `force-app/` (`--source-dir`), patrz „Problemy”.
+  - Gdy w repozytorium nie ma jeszcze testów Apex, kroki bramki są pomijane (job zielony); `--fail-on-empty` pozwoli to zaostrzyć, gdy w M2 pojawi się logika.
+  - `unittest` zamiast `pytest` — skrypt CI bez zależności instalowanych w potoku.
+- **Problemy:** Experience Cloud dodaje do scratch orga własne kontrolery z testami (`SiteRegisterController`, `CommunitiesSelfRegController` i in.). Przy `RunLocalTests` liczyły się do wyniku i zawyżały go: klasa testowa z 40% pokrycia dała łącznie 82,14% i bramka przepuściła PR. Poprawka: tylko nasze testy i tylko nasze klasy. Lokalnie nie dało się sprawdzić formatu wyniku: CLI 2.78 nie obsługuje obejścia C-1016, a nowy CLI wymaga Node 22 — weryfikacja odbyła się w CI.
+- **Dowody:**
+  - [przebieg 41360184741](https://github.com/Yibux/insurance-app/actions/runs/41360184741) — przed poprawką: tymczasowa klasa `Probe` (40%) przepuszczona przez kontrolery platformy (82,14%);
+  - [przebieg 41360432846](https://github.com/Yibux/insurance-app/actions/runs/41360432846) — po poprawce: `Probe` 40% → **bramka oblewa job**, artefakt zapisany, org usunięty;
+  - [przebieg 41360678033](https://github.com/Yibux/insurance-app/actions/runs/41360678033) — po usunięciu klasy: brak testów Apex, kroki bramki pominięte, job zielony.
+- **Do pracy:** rozdział #83 (bramki jakości w potoku), eksperyment M6 — zmiany obniżające pokrycie jako kategoria „wprowadzonych błędów”; argument, że ślepe `RunLocalTests` może dawać fałszywie zielony wynik.
