@@ -42,3 +42,65 @@ jobs:
 
       - name: CI script unit tests
         run: python3 -m unittest discover --start-directory scripts/ci --pattern "test_*.py" --buffer
+
+  code-analyzer:
+    name: Salesforce Code Analyzer
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+    env:
+      SF_CLI_VERSION: 2.156.8
+      CODE_ANALYZER_VERSION: 5.16.0
+      SF_DISABLE_TELEMETRY: true
+      SF_AUTOUPDATE_DISABLE: true
+      # Fail on Critical (1) and High (2) violations.
+      SEVERITY_THRESHOLD: 2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Install Salesforce CLI and Code Analyzer
+        run: |
+          npm install --global --ignore-scripts "@salesforce/cli@${SF_CLI_VERSION}"
+          sf plugins install "code-analyzer@${CODE_ANALYZER_VERSION}"
+          sf plugins
+          java -version
+
+      - name: Run Code Analyzer
+        run: |
+          mkdir -p reports
+          sf code-analyzer run \
+            --workspace force-app \
+            --rule-selector "pmd:Recommended" \
+            --rule-selector "eslint:Recommended" \
+            --rule-selector "retire-js" \
+            --rule-selector "flow" \
+            --rule-selector "sfge" \
+            --severity-threshold "$SEVERITY_THRESHOLD" \
+            --output-file reports/code-analyzer.sarif \
+            --output-file reports/code-analyzer.html \
+            --view table
+
+      - name: Upload SARIF to code scanning
+        if: always() && hashFiles('reports/code-analyzer.sarif') != ''
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          sarif_file: reports/code-analyzer.sarif
+          category: salesforce-code-analyzer
+
+      - name: Upload report
+        if: always() && hashFiles('reports/code-analyzer.html') != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: code-analyzer-report
+          path: reports/
+          retention-days: 14

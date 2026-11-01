@@ -1,0 +1,9 @@
+# Salesforce Code Analyzer v5 configuration (#18).
+# Rule selection and severity gate: docs/adr/0004-code-analyzer-rules.md
+# Engines are chosen on the command line (--rule-selector) in
+# .github/workflows/pr-validation.yml; this file holds engine settings and
+# rule overrides.
+
+engines:
+  flow:
+    python_command: python3
