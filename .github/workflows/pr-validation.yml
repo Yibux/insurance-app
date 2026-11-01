@@ -86,6 +86,7 @@ jobs:
             --rule-selector "retire-js" \
             --rule-selector "flow" \
             --rule-selector "sfge" \
+            --rule-selector "regex:ApexNoWithoutSharing" \
             --severity-threshold "$SEVERITY_THRESHOLD" \
             --output-file reports/code-analyzer.sarif \
             --output-file reports/code-analyzer.html \

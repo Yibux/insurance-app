@@ -1,9 +1,28 @@
 # Salesforce Code Analyzer v5 configuration (#18).
 # Rule selection and severity gate: docs/adr/0004-code-analyzer-rules.md
 # Engines are chosen on the command line (--rule-selector) in
-# .github/workflows/pr-validation.yml; this file holds engine settings and
-# rule overrides.
+# .github/workflows/pr-validation.yml; this file holds engine settings,
+# custom rules and rule overrides.
+
+rules:
+  pmd:
+    # Not in the Recommended set; NFR-SEC-03 requires an explicit sharing
+    # declaration on every class that touches data.
+    ApexSharingViolations:
+      severity: 2
+      tags: ["Recommended", "Security", "Apex"]
 
 engines:
   flow:
     python_command: python3
+  regex:
+    custom_rules:
+      # PMD does not flag an explicit `without sharing`; NFR-SEC-03 allows
+      # only `with sharing` / `inherited sharing`.
+      ApexNoWithoutSharing:
+        regex: /\bwithout\s+sharing\b/gi
+        file_extensions: [".cls", ".trigger"]
+        description: "Apex classes must not bypass record sharing with `without sharing` (NFR-SEC-03)."
+        violation_message: "Use `with sharing` or `inherited sharing`; `without sharing` needs an ADR and a suppression."
+        severity: 2
+        tags: ["Recommended", "Security", "Apex"]
