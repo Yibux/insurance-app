@@ -43,6 +43,62 @@ jobs:
       - name: CI script unit tests
         run: python3 -m unittest discover --start-directory scripts/ci --pattern "test_*.py" --buffer
 
+  gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      security-events: write
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install gitleaks
+        run: |
+          archive="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/${archive}"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/$archive" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" gitleaks
+          sudo install "$RUNNER_TEMP/gitleaks" /usr/local/bin/gitleaks
+          gitleaks version
+
+      - name: Self-test with a canary token
+        # Generated at runtime so no fake secret is ever committed.
+        run: |
+          canary_dir="$RUNNER_TEMP/canary"
+          mkdir -p "$canary_dir"
+          printf 'token = "ghp_%s"\n' "$(head -c 18 /dev/urandom | od -An -tx1 | tr -d ' \n')" > "$canary_dir/config.txt"
+          if gitleaks dir "$canary_dir" --no-banner --redact --log-level error > /dev/null; then
+            echo "::error::gitleaks did not detect the canary token"
+            exit 1
+          fi
+          echo "Canary detected as expected."
+
+      - name: Scan full git history
+        run: |
+          mkdir -p reports
+          gitleaks git . \
+            --config .gitleaks.toml \
+            --redact \
+            --no-banner \
+            --report-format sarif \
+            --report-path reports/gitleaks.sarif
+
+      - name: Upload SARIF to code scanning
+        if: always() && hashFiles('reports/gitleaks.sarif') != ''
+        uses: github/codeql-action/upload-sarif@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          sarif_file: reports/gitleaks.sarif
+          category: gitleaks
+
   code-analyzer:
     name: Salesforce Code Analyzer
     runs-on: ubuntu-latest

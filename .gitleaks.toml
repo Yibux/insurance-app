@@ -1,0 +1,18 @@
+# gitleaks configuration (#19). Used by CI (.github/workflows/pr-validation.yml)
+# and by the Husky pre-commit hook (scripts/hooks/gitleaks-staged.sh).
+#
+# Start from the built-in rule set and keep the allowlist as small as possible.
+# Every entry needs a comment with the reason and the issue/PR that added it;
+# procedure: docs/runbooki/skanowanie-sekretow.md
+
+title = "insurance-app"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Files that cannot contain secrets"
+paths = [
+  # npm lockfile: integrity hashes look like high-entropy tokens.
+  '''(^|/)package-lock\.json$''',
+]
