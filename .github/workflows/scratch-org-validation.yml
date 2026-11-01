@@ -70,6 +70,12 @@ jobs:
           echo "Authenticated to Dev Hub."
 
       - name: Create scratch org
+        env:
+          # The signup service cannot replicate an External Client App into a
+          # new scratch org (error C-1016), so signup uses the built-in CLI
+          # connected app. The Dev Hub itself is still accessed via our ECA.
+          SF_SCRATCH_SIGNUP_CONNECTED_APP: PlatformCLI
+          SF_SCRATCH_SIGNUP_CALLBACK_URL: http://localhost:1717/OauthRedirect
         run: |
           sf org create scratch \
             --definition-file config/project-scratch-def.json \
