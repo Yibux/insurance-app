@@ -77,3 +77,21 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
   - [przebieg 41362094070](https://github.com/Yibux/insurance-app/actions/runs/41362094070) — po dodaniu reguł: 5 × High (SOQL injection, 2 × CRUD, `without sharing`, brak sharingu) → job oblany;
   - [przebieg 41362236031](https://github.com/Yibux/insurance-app/actions/runs/41362236031) — po usunięciu klas testowych: job zielony.
 - **Do pracy:** rozdział #83 (SAST w potoku, dobór reguł vs szum), eksperyment M6 — macierz „podatność → reguła → wynik” jako baza do TP/FN; argument, że domyślne zestawy reguł trzeba weryfikować pod wymagania (Bavadiya 2022).
+
+### #19 Add gitleaks secret scanning in CI and pre-commit
+
+- **Data:** 2026-11-02 · **PR:** #104 · **Wymagania:** FR-CI-05, FR-CI-09, NFR-SEC-05
+- **Co zrobiono:** Dodano skanowanie sekretów gitleaks w dwóch miejscach: job `gitleaks` w `pr-validation.yml` skanuje **całą historię** repozytorium przy każdym PR (SARIF do code scanning), a hook pre-commit Husky skanuje zmiany w stage przed commitem. Konfiguracja i allowlista w `.gitleaks.toml`, procedura w [runbooku](../runbooki/skanowanie-sekretow.md).
+- **Jak:**
+  - binarka gitleaks 8.30.1 pobierana z wydania na GitHubie i weryfikowana **przypiętą sumą SHA-256** (nie plikiem sum z tego samego wydania);
+  - `gitleaks git . --config .gitleaks.toml --redact --report-format sarif` po `checkout` z `fetch-depth: 0`;
+  - `scripts/hooks/gitleaks-staged.sh` → `gitleaks git --pre-commit --staged --redact`, wywoływany z `.husky/pre-commit` przed `lint-staged`.
+- **Decyzje i alternatywy:**
+  - Binarka CLI zamiast `gitleaks/gitleaks-action` — pełna kontrola wersji i sumy kontrolnej, brak zależności od licencji akcji.
+  - Pełna historia przy każdym PR zamiast tylko commitów PR — repo jest małe (sekundy), a wykrywa też sekret dodany i usunięty w kolejnych commitach.
+  - **Autotest z kanarkiem**: job generuje w locie token w formacie GitHub PAT i wymaga, żeby gitleaks go wykrył — zepsuty skaner nie da fałszywie zielonego wyniku. Token nie trafia do historii (stały fałszywy sekret w repo psułby skan całej historii).
+  - Hook lokalny ostrzega i przepuszcza commit, gdy gitleaks nie jest zainstalowany — CI pozostaje bramką obowiązkową.
+  - `--redact` wszędzie: znaleziony sekret nie trafia do logów CI ani do SARIF.
+- **Problemy:** PR trafił w konflikt w `docs/adr/README.md` (gałąź wyrosła z `main` sprzed merge'a #98), przez co **workflowy `pull_request` w ogóle się nie uruchomiły** — GitHub nie tworzy merge refa dla PR z konfliktem. Rozwiązano przez merge `main` do #103 i przeniesienie do #104.
+- **Dowody:** [przebieg 41363508969](https://github.com/Yibux/insurance-app/actions/runs/41363508969) — suma kontrolna OK, kanarek wykryty, „26 commits scanned, no leaks found”, SARIF wysłany. <!-- commit testowy z hookiem po instalacji gitleaks lokalnie -->
+- **Do pracy:** rozdział #83 (sekrety i łańcuch dostaw — IEEE 2025 SLR), eksperyment M6 — kategoria „wyciek sekretu” w katalogu podatnych zmian (sekret generowany w eksperymencie, nie commitowany na stałe).
