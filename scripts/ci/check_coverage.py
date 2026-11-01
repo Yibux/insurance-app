@@ -70,16 +70,24 @@ def failing_tests(report: dict) -> int:
     return sum(1 for test in report.get("tests") or [] if test.get("Outcome") != "Pass")
 
 
+def source_class_names(source_dir: Path) -> set[str]:
+    """Names of Apex classes kept in the repository (``*.cls`` files)."""
+    return {path.stem for path in source_dir.rglob("*.cls")}
+
+
 def evaluate(
     report: dict,
     threshold: float = DEFAULT_THRESHOLD,
     per_class_threshold: float | None = None,
     exclude: list[str] | None = None,
     fail_on_empty: bool = False,
+    only: set[str] | None = None,
 ) -> GateResult:
     exclude = exclude or []
     classes = [
-        c for c in parse_classes(report) if not any(fnmatch.fnmatch(c.name, p) for p in exclude)
+        c
+        for c in parse_classes(report)
+        if (only is None or c.name in only) and not any(fnmatch.fnmatch(c.name, p) for p in exclude)
     ]
     failed = failing_tests(report)
     messages: list[str] = []
@@ -151,6 +159,12 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help="class name glob to ignore (repeatable)",
     )
     parser.add_argument(
+        "--source-dir",
+        type=Path,
+        help="count only classes whose .cls file is in this directory, ignoring "
+        "classes the platform adds to the org (e.g. Experience Cloud controllers)",
+    )
+    parser.add_argument(
         "--fail-on-empty",
         action="store_true",
         help="fail when the report has no coverage data",
@@ -166,6 +180,7 @@ def main(argv: list[str] | None = None) -> int:
         per_class_threshold=args.per_class_threshold,
         exclude=args.exclude,
         fail_on_empty=args.fail_on_empty,
+        only=source_class_names(args.source_dir) if args.source_dir else None,
     )
     summary = render_markdown(result, args.per_class_threshold or args.threshold)
     print(summary)

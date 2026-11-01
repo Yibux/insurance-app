@@ -63,6 +63,20 @@ class EvaluateTest(unittest.TestCase):
         result = cc.evaluate(report([])["result"], fail_on_empty=True)
         self.assertFalse(result.passed)
 
+    def test_only_counts_selected_classes(self):
+        data = report([("Ours", 2, 5), ("SiteRegisterController", 22, 27)])["result"]
+        result = cc.evaluate(data, only={"Ours"})
+        self.assertFalse(result.passed)
+        self.assertAlmostEqual(result.org_wide, 40.0)
+
+    def test_source_class_names(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            classes = Path(tmp) / "main" / "default" / "classes"
+            classes.mkdir(parents=True)
+            for name in ("Ours.cls", "Ours.cls-meta.xml", "OursTest.cls"):
+                (classes / name).write_text("", encoding="utf-8")
+            self.assertEqual(cc.source_class_names(Path(tmp)), {"Ours", "OursTest"})
+
     def test_covered_lines_counted_from_line_map(self):
         data = {"coverage": {"coverage": [{"name": "A", "totalLines": 4, "lines": {"1": 1, "2": 0, "3": 3, "4": 0}}]}}
         self.assertEqual(cc.parse_classes(data)[0].covered, 2)

@@ -95,7 +95,10 @@ jobs:
       - name: Run Apex tests
         id: apex
         run: |
-          if ! grep -rqil --include='*.cls' '@istest' force-app; then
+          # Run only our test classes: RunLocalTests would also run the
+          # Experience Cloud controller tests the platform adds to the org.
+          mapfile -t test_classes < <(grep -rli --include='*.cls' '@istest' force-app | xargs -r -n1 basename | sed 's/\.cls$//' | sort)
+          if [ "${#test_classes[@]}" -eq 0 ]; then
             echo "No Apex test classes in force-app; skipping."
             echo "ran=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -103,10 +106,13 @@ jobs:
           results="$RUNNER_TEMP/apex-results"
           mkdir -p "$results"
           echo "ran=true" >> "$GITHUB_OUTPUT"
+          echo "Test classes: ${test_classes[*]}"
+          class_args=()
+          for name in "${test_classes[@]}"; do class_args+=(--class-names "$name"); done
           set +e
           sf apex run test \
             --target-org "$SCRATCH_ALIAS" \
-            --test-level RunLocalTests \
+            "${class_args[@]}" \
             --code-coverage \
             --output-dir "$results" \
             --wait 30 \
@@ -121,7 +127,7 @@ jobs:
 
       - name: Coverage gate
         if: steps.apex.outputs.ran == 'true'
-        run: python3 scripts/ci/check_coverage.py "$RUNNER_TEMP/apex-results/sf-apex-run-test.json"
+        run: python3 scripts/ci/check_coverage.py "$RUNNER_TEMP/apex-results/sf-apex-run-test.json" --source-dir force-app
 
       - name: Upload Apex test results
         if: always() && steps.apex.outputs.ran == 'true'
