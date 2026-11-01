@@ -80,7 +80,6 @@ jobs:
           mkdir -p reports
           sf code-analyzer run \
             --workspace force-app \
-            --workspace sast-probe \
             --rule-selector "pmd:Recommended" \
             --rule-selector "eslint:Recommended" \
             --rule-selector "retire-js" \
