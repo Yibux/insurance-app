@@ -39,3 +39,6 @@ jobs:
 
       - name: LWC Jest
         run: npm run test:unit -- --ci
+
+      - name: CI script unit tests
+        run: python3 -m unittest discover --start-directory scripts/ci --pattern "test_*.py" --buffer
