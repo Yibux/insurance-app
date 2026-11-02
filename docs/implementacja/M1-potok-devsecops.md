@@ -95,3 +95,13 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 - **Problemy:** PR trafił w konflikt w `docs/adr/README.md` (gałąź wyrosła z `main` sprzed merge'a #98), przez co **workflowy `pull_request` w ogóle się nie uruchomiły** — GitHub nie tworzy merge refa dla PR z konfliktem. Rozwiązano przez merge `main` do #103 i przeniesienie do #104.
 - **Dowody:** [przebieg 41363508969](https://github.com/Yibux/insurance-app/actions/runs/41363508969) — suma kontrolna OK, kanarek wykryty, „26 commits scanned, no leaks found”, SARIF wysłany. <!-- commit testowy z hookiem po instalacji gitleaks lokalnie -->
 - **Do pracy:** rozdział #83 (sekrety i łańcuch dostaw — IEEE 2025 SLR), eksperyment M6 — kategoria „wyciek sekretu” w katalogu podatnych zmian (sekret generowany w eksperymencie, nie commitowany na stałe).
+
+### #20 Add CodeQL workflow for JavaScript
+
+- **Data:** 2026-11-02 · **PR:** #106 · **Wymagania:** FR-CI-06
+- **Co zrobiono:** Dodano workflow `.github/workflows/codeql.yml` uruchamiający analizę CodeQL dla JavaScriptu/TypeScriptu przy PR do `main`, przy pushu do `main` i raz w tygodniu. Wyniki trafiają do GitHub code scanning (zakładka Security) z kategorią `/language:javascript-typescript`.
+- **Jak:** `github/codeql-action/init` (`build-mode: none`, `queries: security-extended`) i `analyze` w wersji 4.39.1 przypiętej do SHA; macierz `language` gotowa na dopisanie Pythona w #58; cron `17 4 * * 1`; `security-events: write` tylko w jobie analizy.
+- **Decyzje i alternatywy:** osobny workflow zamiast konfiguracji domyślnej lub joba w `pr-validation.yml`, pakiet `security-extended` — [ADR 0005](../adr/0005-codeql-workflow.md). Workflow nie ma filtra `paths:` i nie dotyka scratch orgów.
+- **Problemy:** brak. Uwaga: CodeQL tylko raportuje alerty; blokowanie merge'a wymaga reguły code scanning w rulesecie `main` (ustawienie repozytorium, poza kodem).
+- **Dowody:** [przebieg 41455615705](https://github.com/Yibux/insurance-app/actions/runs/41455615705) — job zielony; API `code-scanning/analyses` dla `refs/pull/106/merge` zwraca analizę narzędzia CodeQL (103 reguły, 0 wyników) obok analiz Code Analyzer i gitleaks. Ścieżka „blokuje podatny kod” nie była sprawdzana (workflow nie oblewa PR sam z siebie).
+- **Do pracy:** rozdział #83 (SAST drugiej generacji — analiza przepływu danych vs reguły wzorcowe), eksperyment M6 — porównanie wykrywalności CodeQL i Code Analyzera na tych samych wstrzykniętych podatnościach JS.
