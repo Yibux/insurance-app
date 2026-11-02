@@ -105,3 +105,19 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 - **Problemy:** brak. Uwaga: CodeQL tylko raportuje alerty; blokowanie merge'a wymaga reguły code scanning w rulesecie `main` (ustawienie repozytorium, poza kodem).
 - **Dowody:** [przebieg 41455615705](https://github.com/Yibux/insurance-app/actions/runs/41455615705) — job zielony; API `code-scanning/analyses` dla `refs/pull/106/merge` zwraca analizę narzędzia CodeQL (103 reguły, 0 wyników) obok analiz Code Analyzer i gitleaks. Ścieżka „blokuje podatny kod” nie była sprawdzana (workflow nie oblewa PR sam z siebie).
 - **Do pracy:** rozdział #83 (SAST drugiej generacji — analiza przepływu danych vs reguły wzorcowe), eksperyment M6 — porównanie wykrywalności CodeQL i Code Analyzera na tych samych wstrzykniętych podatnościach JS.
+
+### #21 Configure Dependabot and npm audit gate
+
+- **Data:** 2026-11-02 · **PR:** #107 · **Wymagania:** FR-CI-05
+- **Co zrobiono:** Dodano `.github/dependabot.yml` (cotygodniowe aktualizacje zależności npm i akcji GitHub) oraz krok `npm audit --audit-level=high` w jobie `static-checks` w `pr-validation.yml`. PR z nową podatnością o wadze high lub critical w zależnościach jest oblewany.
+- **Jak:**
+  - Dependabot: ekosystemy `npm` i `github-actions`, poniedziałek, limit 5 PR-ów, grupowanie minor/patch (npm; akcje w grupach `actions-scratch-org` i `actions-other`), `cooldown` 7 dni, prefiksy `chore(deps)` / `chore(ci)`; `pip` dojdzie w #58.
+  - `npm audit --audit-level=high` po `npm ci --ignore-scripts`, na pełnym drzewie (z zależnościami deweloperskimi).
+  - Decyzja i alternatywy: [ADR 0006](../adr/0006-dependabot-npm-audit.md).
+- **Decyzje i alternatywy:** `dependabot.yml` plus bramka w PR zamiast samych alertów (nie blokują) lub zewnętrznego skanera SCA (zbędna zależność). Próg `high`, bo `moderate` (33 porady w narzędziach deweloperskich, stan z 2026-11-02) zablokowałoby wszystkie PR-y bez możliwości naprawy.
+- **Problemy:** Bramka od razu byłaby czerwona: `npm audit` (stan bazy porad z 2026-11-02) zgłaszał 2 porady high w zależnościach deweloperskich (`follow-redirects` 1.16.1 i `joi` 18.2.9, tranzytywnie przez `prettier-plugin-apex` → `wait-on`). Naprawa bez zmiany `package.json`: `npm update follow-redirects joi` (1.16.2 i 18.3.1, tylko `package-lock.json`). Pozostałe 45 porad (low/moderate, stan z 2026-11-02) zostaje poniżej progu. Przegląd bezpieczeństwa wskazał, że PR Dependabota zmieniający akcje używane w `scratch-org-validation.yml` uruchomi walidację scratch org (zużyje org i padnie na braku sekretów `devhub`); dlatego te akcje są w osobnej grupie `actions-scratch-org`, a taki czerwony check obsługuje właściciel ręcznie (ADR 0006). Dodano też `cooldown` 7 dni i ograniczono grupy akcji do minor/patch. Na Windows lokalne testy `scripts/ci` wymagają `PYTHONUTF8=1` (emoji w tabeli podsumowania), w CI (Linux) problemu nie ma.
+- **Dowody:**
+  - [przebieg 41457587365](https://github.com/Yibux/insurance-app/actions/runs/41457587365) — `PR validation` zielony, w tym krok `npm audit --audit-level=high` (0 podatności high) w jobie `static-checks`; [przebieg CodeQL 41457587148](https://github.com/Yibux/insurance-app/actions/runs/41457587148) zielony;
+  - po poprawkach z przeglądu bezpieczeństwa (grupy akcji, `cooldown`): [PR validation 41476103483](https://github.com/Yibux/insurance-app/actions/runs/41476103483) i [CodeQL 41476103529](https://github.com/Yibux/insurance-app/actions/runs/41476103529) zielone;
+  - ścieżka „blokuje” sprawdzona **tylko lokalnie**: z tymczasową zależnością `lodash@4.17.20` `npm audit --audit-level=high` kończy się kodem 1 (commit próbny c617ee7, wycofany w 9c3ce08); w CI nie powtarzano.
+- **Do pracy:** rozdział #83 (analiza składu oprogramowania i łańcuch dostaw — IEEE 2025 SLR), eksperyment M6 — kategoria „podatna zależność” w katalogu wprowadzanych błędów; obserwacja, że bramka SCA wykrywa porady z bazy w danym dniu, więc ten sam commit może zmienić wynik.

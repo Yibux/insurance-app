@@ -1,0 +1,58 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - area:security
+    cooldown:
+      default-days: 7
+    groups:
+      npm-minor-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - area:security
+    cooldown:
+      default-days: 7
+    groups:
+      # These three actions are also used in scratch-org-validation.yml, so a
+      # PR touching them triggers that workflow (see ADR 0006). Keeping them in
+      # one group limits this to one scratch org per update PR. Major versions
+      # are not grouped and arrive as separate PRs.
+      actions-scratch-org:
+        patterns:
+          - "actions/checkout"
+          - "actions/setup-node"
+          - "actions/upload-artifact"
+        update-types:
+          - minor
+          - patch
+      actions-other:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "actions/checkout"
+          - "actions/setup-node"
+          - "actions/upload-artifact"
+        update-types:
+          - minor
+          - patch
+
+  # Python (pip) for integration-server/ is added in M4 (#58).
