@@ -50,3 +50,6 @@ sfca_results.json
 *.crt
 *.p12
 *.pfx
+
+# Local coordinator handoff notes (/koordynator)
+.claude/coordinator/

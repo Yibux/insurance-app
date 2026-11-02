@@ -6,6 +6,13 @@ Repository `Yibux/insurance-app` (public), monorepo: Salesforce metadata in
 `force-app/`, Python backend in `integration-server/` (from M4), CI in
 `.github/workflows/`, documentation in `docs/`.
 
+## Coordination
+
+Work is dispatched from the main chat by the `/koordynator` skill
+(`.claude/skills/koordynator/SKILL.md`) using `backlog-planner`. Subagents
+cannot start other subagents — if a task needs another agent (security
+review, CI diagnosis), say so in the report and the coordinator runs it.
+
 ## Sources of truth
 
 - `docs/KONWENCJE.md` — branches, Conventional Commits, Definition of Done,
