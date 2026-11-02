@@ -57,6 +57,7 @@ Problem ma dwa wymiary, które w pracy traktuje się łącznie. Wymiar projektow
   - wady wydajnościowe: zapytanie SOQL w pętli (wymaganie NFR-PERF-02).
 
   Miary to liczba wyników prawdziwie pozytywnych (TP), fałszywie negatywnych (FN) i fałszywie pozytywnych (FP) dla każdej bramki. Do pomiaru FP proponuje się grupę kontrolną zmian poprawnych, zgłaszanych tak samo jak zmiany podatne.
+
 - **PB2.** Na którym etapie podatność zostaje wykryta: lokalnie przed zatwierdzeniem zmiany, przez skrypty uruchamiane automatycznie przez system Git (ang. _Git hooks_), w potoku PR, czy wcale?
 - **PB3.** Jaki jest koszt czasowy pełnej walidacji PR w ograniczeniach środowiska Developer Edition? Czy mediana czasu walidacji mieści się w założonym limicie 20 minut (NFR-PERF-01)?
 - **PB4.** Czy zaprojektowany model uprawnień spełnia wymagania NFR-SEC-01 – NFR-SEC-04 i NFR-SEC-07? Weryfikacja obejmuje negatywne testy Apex wykonywane w kontekście konkretnych użytkowników (`System.runAs`), czyli próby odczytu i modyfikacji cudzych rekordów. Obejmuje też manualny test penetracyjny portalu klienta.
@@ -116,16 +117,16 @@ Roboczy układ pracy przedstawiono w tabeli 1.1.
 
 **Tabela 1.1.** Roboczy układ rozdziałów pracy (do zatwierdzenia z promotorem, issue #12)
 
-| Rozdział | Tytuł roboczy                                                                 | Zawartość                                                                                                                                               | Zadanie |
-| -------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| 1        | Wstęp                                                                         | motywacja, problem, cel, pytania badawcze, zakres, metoda, wkład własny                                                                                 | #81     |
+| Rozdział | Tytuł roboczy                                                                 | Zawartość                                                                                                                                                | Zadanie |
+| -------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| 1        | Wstęp                                                                         | motywacja, problem, cel, pytania badawcze, zakres, metoda, wkład własny                                                                                  | #81     |
 | 2        | Bezpieczeństwo chmurowych systemów CRM i model zerowego zaufania w Salesforce | wielodostępność, model współodpowiedzialności, Zero Trust (Al Kalach, 2025), mechanizmy bezpieczeństwa platformy (widoczność rekordów, uprawnienia, FLS) | #82     |
-| 3        | DevSecOps i CI/CD                                                             | shift-left, SAST, zarządzanie sekretami, łańcuch dostaw; Bavadiya (2022), Cheenepalli i in. (2025), IEEE SLR (2025), Jammeh (2020), Lakade (2025) i in. | #83     |
-| 4        | Środowiska efemeryczne i bezpieczeństwo integracji                            | scratch orgi (Guduru, 2023; SF DX Guide), JWT i OAuth 2.0 (Machapatri, 2020), obiekty zewnętrzne i rezydencja danych                                    | #84     |
-| 5        | Wymagania i projekt systemu                                                   | wymagania, decyzje architektoniczne (ADR), model danych, model uprawnień, architektura potoku                                                           | #85     |
-| 6        | Implementacja                                                                 | realizacja etapów M0–M6 na podstawie dziennika implementacji                                                                                            | #86     |
-| 7        | Wyniki eksperymentu i dyskusja                                                | metodyka, wyniki, zagrożenia dla trafności, porównanie z literaturą                                                                                     | #87     |
-| 8        | Podsumowanie i wnioski                                                        | ocena realizacji celów, ograniczenia, kierunki dalszych prac                                                                                            | #88     |
+| 3        | DevSecOps i CI/CD                                                             | shift-left, SAST, zarządzanie sekretami, łańcuch dostaw; Bavadiya (2022), Cheenepalli i in. (2025), IEEE SLR (2025), Jammeh (2020), Lakade (2025) i in.  | #83     |
+| 4        | Środowiska efemeryczne i bezpieczeństwo integracji                            | scratch orgi (Guduru, 2023; SF DX Guide), JWT i OAuth 2.0 (Machapatri, 2020), obiekty zewnętrzne i rezydencja danych                                     | #84     |
+| 5        | Wymagania i projekt systemu                                                   | wymagania, decyzje architektoniczne (ADR), model danych, model uprawnień, architektura potoku                                                            | #85     |
+| 6        | Implementacja                                                                 | realizacja etapów M0–M6 na podstawie dziennika implementacji                                                                                             | #86     |
+| 7        | Wyniki eksperymentu i dyskusja                                                | metodyka, wyniki, zagrożenia dla trafności, porównanie z literaturą                                                                                      | #87     |
+| 8        | Podsumowanie i wnioski                                                        | ocena realizacji celów, ograniczenia, kierunki dalszych prac                                                                                             | #88     |
 
 Źródło: opracowanie własne na podstawie [BACKLOG.md](../BACKLOG.md) (zadania #81–#88) i [HARMONOGRAM.md, pkt 3](../HARMONOGRAM.md#3-literatura-z-raportu-gdzie-ją-wykorzystać).
 
