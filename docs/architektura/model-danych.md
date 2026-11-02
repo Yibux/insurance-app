@@ -12,12 +12,12 @@ Dokument opisuje docelowy model danych. Jest specyfikacją dla zadań #30 i #31;
 erDiagram
     ACCOUNT ||--o{ CONTACT : "grupuje"
     CONTACT ||--o{ POLICY : "ubezpieczony (Insured__c)"
-    USER ||--o{ POLICY : "agent (Agent__c)"
+    USER ||--o{ POLICY : "agent = właściciel (OwnerId)"
     POLICY ||--|{ COVERAGE : "zakresy ochrony (master-detail)"
     POLICY ||--o{ CLAIM : "szkody (Policy__c)"
     COVERAGE ||--o{ CLAIM : "zakres szkody (Coverage__c)"
     CONTACT ||--o{ CLAIM : "zgłaszający (Claimant__c)"
-    USER ||--o{ CLAIM : "likwidator (Adjuster__c)"
+    USER ||--o{ CLAIM : "likwidator = właściciel (OwnerId)"
     CLAIM ||--o{ CLAIM_DOCUMENT : "dokumenty (master-detail)"
     CLAIM_DOCUMENT ||--o{ CONTENT_DOCUMENT_LINK : "pliki (Files)"
     CONTACT ||--o{ CASE : "komunikacja z agentem (M3)"
@@ -44,8 +44,8 @@ erDiagram
         string Name "autonumer"
         string Policy_Number__c UK "numer polisy"
         string Product_Type__c "picklist"
+        Id OwnerId FK "User: agent"
         Id Insured__c FK "Contact"
-        Id Agent__c FK "User"
         date Start_Date__c
         date End_Date__c
         currency Premium__c
@@ -66,8 +66,8 @@ erDiagram
         string Name "autonumer"
         Id Policy__c FK
         Id Coverage__c FK
+        Id OwnerId FK "User/kolejka: likwidator"
         Id Claimant__c FK "Contact"
-        Id Adjuster__c FK "User"
         date Incident_Date__c
         string Description__c
         string Status__c "Submitted ... Closed"
@@ -108,89 +108,100 @@ Legenda: `PK` — klucz główny, `FK` — klucz obcy (lookup lub master-detail)
 | Relacja                          | Typ                   | Uzasadnienie                                                                                                                                                                               |
 | -------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `Policy__c` → `Contact`          | Lookup (wymagany)     | Ubezpieczony to `Contact` powiązany z `Account` (ADR-0002); użytkownik portalu jest powiązany z kontaktem, co umożliwia Sharing Sets (NFR-SEC-07).                                         |
-| `Policy__c` → `User` (agent)     | Lookup (wymagany)     | Podstawa reguł współdzielenia „portfel agenta” (FR-POL-04).                                                                                                                                |
-| `Coverage__c` → `Policy__c`      | Master-detail         | Zakres nie istnieje bez polisy; przy OWD Private rekord potomny dziedziczy widoczność po polisie, więc nie trzeba utrzymywać osobnego współdzielenia.                                      |
+| `Coverage__c` → `Policy__c`      | Master-detail         | Zakres nie istnieje bez polisy; przy OWD Private rekord potomny dziedziczy widoczność po polisie, więc nie trzeba utrzymywać osobnego współdzielenia; „Allow reparenting” wyłączone.       |
 | `Claim__c` → `Policy__c`         | Lookup (wymagany)     | Szkoda ma własny cykl życia i własny model dostępu (likwidator, agent, klient), dlatego nie dziedziczy sharingu po polisie; usuwanie polisy ze szkodami blokowane (`restrict delete`).     |
 | `Claim__c` → `Coverage__c`       | Lookup (wymagany)     | FR-CLM-01: szkoda wskazuje zakres obowiązujący w dniu zdarzenia. Spójność (zakres należy do tej samej polisy, polisa aktywna w `Incident_Date__c`) wymusza logika Apex (#35), nie schemat. |
-| `Claim_Document__c` → `Claim__c` | Master-detail         | Dokument dziedziczy widoczność po szkodzie; usunięcie szkody usuwa metadane dokumentów.                                                                                                    |
+| `Claim_Document__c` → `Claim__c` | Master-detail         | Dokument dziedziczy widoczność po szkodzie; usunięcie szkody usuwa metadane dokumentów; „Allow reparenting” wyłączone.                                                                     |
 | Pliki → `Claim_Document__c`      | `ContentDocumentLink` | Pliki (Salesforce Files) podpinane do rekordu `Claim_Document__c`; limity rozmiaru i typów MIME: NFR-SEC-10 (#49).                                                                         |
 | `Case` → `Contact`               | Standardowa           | Komunikacja klient–agent (FR-COM, M3); `Case` nie reprezentuje szkody (ADR-0002, opcja 3).                                                                                                 |
 | Płatności (External Object)      | Brak kopii            | Powiązanie logiczne po numerze polisy (M5); dane płatnicze zostają w systemie źródłowym.                                                                                                   |
 
+### Model dostępu a schemat (decyzje do potwierdzenia)
+
+Uzasadnienie wyborów poniżej: deklaratywne reguły współdzielenia (sharing rules) opierają się na właścicielu rekordu lub kryteriach pól i udostępniają rekordy rolom, grupom i kolejkom — **nie** użytkownikowi wskazanemu w polu lookup. Pole `User` w lookupie niczego więc nie współdzieli przy OWD Private.
+
+- **Portfel agenta — Policy (FR-POL-04, NFR-SEC-01).** Wybrano wariant (a): agent jest **właścicielem polisy** (`OwnerId`); osobne pole `Agent__c` nie istnieje. Dostęp wynika z własności, a nadzór (kierownik) z hierarchii ról. Wariant (b) (Apex managed sharing `Policy__Share`) odrzucono dla polis jako zbędnie złożony, skoro własność w pełni opisuje portfel.
+- **Dostęp agenta do szkód.** Szkoda nie dziedziczy sharingu po polisie (jest lookupem), a reguła nie sięga do `Policy__r.OwnerId`. Wybrano **Apex managed sharing** (`Claim__Share`, własny `RowCause` np. `Agent_Portfolio__c`): serwis Apex (#35) przy tworzeniu szkody udostępnia ją właścicielowi polisy (Read) i utrzymuje wpis przy zmianie właściciela polisy. Alternatywa — zdenormalizowane pole agenta na szkodzie — też wymagałoby Apex sharingu, więc nie daje korzyści.
+- **Likwidator** jest właścicielem szkody (`OwnerId`: użytkownik lub kolejka, FR-CLM-04); pole `Adjuster__c` zbędne.
+- **Klient portalu: tylko odczyt.** Wybrano wariant (a): klient ma **Read-only** na `Claim__c`, `Claim_Document__c`, `Policy__c`, `Coverage__c` (Sharing Set po koncie). Szkodę i dokumenty tworzy wyłącznie serwis Apex (kontroler portalu → serwis) po weryfikacji własności; wariant (b) (Read/Write + reguły walidacji blokujące zmiany po statusie Submitted) odrzucono, bo FLS nie odróżnia tworzenia od edycji, a tworzenie dokumentu (master-detail) wymagałoby zapisu na szkodzie, co otwierałoby edycję `Incident_Date__c`, `Claimed_Amount__c` i `Description__c` po zgłoszeniu.
+- **Reparenting.** Oba master-detail (`Coverage__c` → `Policy__c`, `Claim_Document__c` → `Claim__c`) mają wyłączone „Allow reparenting”, by nie dało się przenieść potomka pod cudzego rodzica i obejść sharingu.
+
+Decyzje te wymagają potwierdzenia przez właściciela pracy; jeśli zostaną utrzymane, warto je spisać w ADR przy zadaniu #32.
+
 ### Założenia dla implementacji (#30, #31)
 
-- OWD **Private** dla `Policy__c` i `Claim__c` (NFR-SEC-01); `Coverage__c` i `Claim_Document__c` dziedziczą dostęp po rodzicu (master-detail). OWD dla `Contact`/`Account` ustala zadanie dot. sharingu (#32).
+- OWD **Private** dla `Policy__c` i `Claim__c` (NFR-SEC-01), dostęp agenta przez własność (polisa) i Apex managed sharing (szkoda); `Coverage__c` i `Claim_Document__c` dziedziczą dostęp po rodzicu (master-detail). OWD dla `Contact`/`Account` ustala zadanie dot. sharingu (#32).
 - Każdy z czterech obiektów ma pole `External_Id__c` (Text, unique, External ID) pod migrację z backendu Python (M4) i upsert po kluczu zewnętrznym.
 - Statusy jako picklisty z regułami walidacji ścieżek przejść (FR-POL-03, FR-CLM-02); Field History Tracking dla `Claim__c.Status__c` oraz kwot (FR-CLM-06, #31).
+- Tworzenie szkody (FR-CLM-01, NFR-SEC-07, NFR-SEC-03): `Claimant__c` ustawiany **po stronie serwera** z `User.ContactId` zalogowanego użytkownika, nigdy z danych wysłanych przez klienta. Serwis Apex (`with sharing`) weryfikuje, że wskazana polisa należy do zgłaszającego (`Policy__c.Insured__c` = jego `ContactId` / to samo konto) zapytaniem `WITH USER_MODE` oraz że zakres należy do tej polisy; brak weryfikacji oznaczałby IDOR (podanie Id cudzej polisy). Test negatywny `System.runAs` użytkownika portalu z cudzą polisą — w #35.
 - Nazwy API są propozycją; ostateczne ustalają #30/#31 — zmiany należy odzwierciedlić w tym dokumencie.
 
 ## 3. Lista pól i klasyfikacja danych
 
 Klasyfikacja:
 
-- **PII** — dane osobowe w rozumieniu RODO (identyfikują osobę lub umożliwiają kontakt);
+- **PII** — dane osobowe w rozumieniu RODO (identyfikują osobę bezpośrednio lub pośrednio albo umożliwiają kontakt);
 - **Wrażliwe** — dane o podwyższonym ryzyku: kwoty finansowe, swobodne opisy mogące zawierać dane zdrowotne lub osobowe, dokumenty;
 - **Biznesowe** — dane operacyjne bez bezpośredniej identyfikacji osoby;
+- **Szczególna kategoria (art. 9 RODO)** — dane o zdrowiu i inne dane szczególnie chronione, które mogą pojawić się w swobodnym tekście lub plikach;
 - **Techniczne** — identyfikatory i pola systemowe.
 
-Kolumna „FLS” to rekomendacja dostępu dla zestawów uprawnień: A — Agent, L — Likwidator, K — Klient portalu; R — odczyt, E — edycja, `-` — brak. Ostateczna macierz powstanie w #33 (NFR-SEC-02).
+Kolumna „FLS” to rekomendacja dostępu dla zestawów uprawnień: A — Agent, L — Likwidator, K — Klient portalu, I — użytkownik integracyjny (backend Python, M4: ładowanie danych przez upsert po `External_Id__c`); R — odczyt, E — edycja, `-` — brak. Ostateczna macierz powstanie w #33 (NFR-SEC-02).
 
 ### 3.1 `Policy__c`
 
-| Pole API           | Typ                     | Klasyfikacja  | Uzasadnienie / minimalizacja (NFR-CMP-03)                                      | FLS (A/L/K) |
-| ------------------ | ----------------------- | ------------- | ------------------------------------------------------------------------------ | ----------- |
-| `Name`             | Auto Number             | Techniczne    | Identyfikator rekordu                                                          | E/R/R       |
-| `Policy_Number__c` | Text(30), unique        | Biznesowe     | Numer polisy; pośrednio identyfikuje osobę — nie logować w komunikatach błędów | E/R/R       |
-| `Product_Type__c`  | Picklist                | Biznesowe     | Wymagane do procesu                                                            | E/R/R       |
-| `Insured__c`       | Lookup(Contact)         | PII (relacja) | Wiąże polisę z osobą; dane osoby zostają w `Contact`, nie są powielane         | E/R/R       |
-| `Agent__c`         | Lookup(User)            | Biznesowe     | Podstawa portfela agenta i sharingu                                            | R/R/R       |
-| `Start_Date__c`    | Date                    | Biznesowe     | Okres ochrony; reguły walidacji dat                                            | E/R/R       |
-| `End_Date__c`      | Date                    | Biznesowe     | Podstawa wygaszania polis (FR-POL-05)                                          | E/R/R       |
-| `Premium__c`       | Currency                | Wrażliwe      | Składka (dane finansowe); ukryta przed rolami bez potrzeby biznesowej          | E/R/R       |
-| `Status__c`        | Picklist                | Biznesowe     | Draft / Active / Expired / Cancelled                                           | E/R/R       |
-| `External_Id__c`   | Text(50), unique, ExtId | Techniczne    | Klucz migracji; w dev/CI wyłącznie identyfikatory syntetyczne (NFR-CMP-02)     | R/-/-       |
+| Pole API           | Typ                     | Klasyfikacja                 | Uzasadnienie / minimalizacja (NFR-CMP-03)                                      | FLS (A/L/K/I) |
+| ------------------ | ----------------------- | ---------------------------- | ------------------------------------------------------------------------------ | ------------- |
+| `Name`             | Auto Number             | Techniczne                   | Identyfikator rekordu                                                          | R/R/R/R       |
+| `Policy_Number__c` | Text(30), unique        | PII (identyfikator pośredni) | Numer polisy; pośrednio identyfikuje osobę — nie logować w komunikatach błędów | E/R/R/E       |
+| `Product_Type__c`  | Picklist                | Biznesowe                    | Wymagane do procesu                                                            | E/R/R/E       |
+| `Insured__c`       | Lookup(Contact)         | PII (relacja)                | Wiąże polisę z osobą; dane osoby zostają w `Contact`, nie są powielane         | E/R/R/E       |
+| `Start_Date__c`    | Date                    | Biznesowe                    | Okres ochrony; reguły walidacji dat                                            | E/R/R/E       |
+| `End_Date__c`      | Date                    | Biznesowe                    | Podstawa wygaszania polis (FR-POL-05)                                          | E/R/R/E       |
+| `Premium__c`       | Currency                | Wrażliwe                     | Składka (dane finansowe); ukryta przed rolami bez potrzeby biznesowej          | E/-/R/E       |
+| `Status__c`        | Picklist                | Biznesowe                    | Draft / Active / Expired / Cancelled                                           | E/R/R/E       |
+| `External_Id__c`   | Text(50), unique, ExtId | Techniczne                   | Klucz migracji; w dev/CI wyłącznie identyfikatory syntetyczne (NFR-CMP-02)     | R/-/-/E       |
 
 ### 3.2 `Coverage__c`
 
-| Pole API           | Typ                     | Klasyfikacja | Uzasadnienie / minimalizacja                | FLS (A/L/K) |
-| ------------------ | ----------------------- | ------------ | ------------------------------------------- | ----------- |
-| `Name`             | Auto Number             | Techniczne   | Identyfikator                               | E/R/R       |
-| `Policy__c`        | Master-Detail(Policy)   | Biznesowe    | Rodzic; dziedziczenie widoczności           | E/R/R       |
-| `Coverage_Type__c` | Picklist                | Biznesowe    | Rodzaj ochrony                              | E/R/R       |
-| `Sum_Insured__c`   | Currency                | Wrażliwe     | Limit odpowiedzialności; podstawa FR-CLM-05 | E/R/R       |
-| `Deductible__c`    | Currency                | Wrażliwe     | Udział własny; podstawa FR-CLM-05           | E/R/R       |
-| `External_Id__c`   | Text(50), unique, ExtId | Techniczne   | Klucz migracji                              | R/-/-       |
+| Pole API           | Typ                     | Klasyfikacja | Uzasadnienie / minimalizacja                | FLS (A/L/K/I) |
+| ------------------ | ----------------------- | ------------ | ------------------------------------------- | ------------- |
+| `Name`             | Auto Number             | Techniczne   | Identyfikator                               | R/R/R/R       |
+| `Policy__c`        | Master-Detail(Policy)   | Biznesowe    | Rodzic; dziedziczenie widoczności           | E/R/R/E       |
+| `Coverage_Type__c` | Picklist                | Biznesowe    | Rodzaj ochrony                              | E/R/R/E       |
+| `Sum_Insured__c`   | Currency                | Wrażliwe     | Limit odpowiedzialności; podstawa FR-CLM-05 | E/R/R/E       |
+| `Deductible__c`    | Currency                | Wrażliwe     | Udział własny; podstawa FR-CLM-05           | E/R/R/E       |
+| `External_Id__c`   | Text(50), unique, ExtId | Techniczne   | Klucz migracji                              | R/-/-/E       |
 
 ### 3.3 `Claim__c`
 
-| Pole API             | Typ                     | Klasyfikacja  | Uzasadnienie / minimalizacja                                                                               | FLS (A/L/K)        |
-| -------------------- | ----------------------- | ------------- | ---------------------------------------------------------------------------------------------------------- | ------------------ |
-| `Name`               | Auto Number             | Techniczne    | Identyfikator                                                                                              | R/R/R              |
-| `Policy__c`          | Lookup(Policy)          | Biznesowe     | Polisa, której dotyczy szkoda                                                                              | R/R/R              |
-| `Coverage__c`        | Lookup(Coverage)        | Biznesowe     | Zakres obowiązujący w dniu zdarzenia (FR-CLM-01)                                                           | R/E/R              |
-| `Claimant__c`        | Lookup(Contact)         | PII (relacja) | Zgłaszający; bez kopiowania danych kontaktowych do szkody                                                  | R/R/R              |
-| `Adjuster__c`        | Lookup(User)            | Biznesowe     | Likwidator (FR-CLM-04); właścicielem rekordu może być kolejka                                              | R/E/-              |
-| `Incident_Date__c`   | Date                    | Biznesowe     | Data zdarzenia                                                                                             | R/R/E (zgłoszenie) |
-| `Description__c`     | Long Text(5000)         | Wrażliwe      | Opis zdarzenia od klienta; może zawierać dane osobowe/zdrowotne — w formularzu ostrzeżenie o minimalizacji | R/R/E              |
-| `Status__c`          | Picklist                | Biznesowe     | Cykl życia (FR-CLM-02); Field History Tracking (FR-CLM-06)                                                 | R/E/R              |
-| `Claimed_Amount__c`  | Currency                | Wrażliwe      | Kwota zgłoszona; Field History                                                                             | R/R/E (zgłoszenie) |
-| `Approved_Amount__c` | Currency                | Wrażliwe      | Kwota zatwierdzona przez likwidatora; Field History                                                        | -/E/R              |
-| `Payout_Amount__c`   | Currency                | Wrażliwe      | Kwota wypłaty, limit z FR-CLM-05; Field History. Transakcje płatnicze pozostają poza CRM                   | -/E/R              |
-| `External_Id__c`     | Text(50), unique, ExtId | Techniczne    | Klucz migracji                                                                                             | R/-/-              |
+| Pole API             | Typ                     | Klasyfikacja                  | Uzasadnienie / minimalizacja                                                                               | FLS (A/L/K/I) |
+| -------------------- | ----------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------- |
+| `Name`               | Auto Number             | Techniczne                    | Identyfikator                                                                                              | R/R/R/R       |
+| `Policy__c`          | Lookup(Policy)          | Biznesowe                     | Polisa, której dotyczy szkoda                                                                              | R/R/R/E       |
+| `Coverage__c`        | Lookup(Coverage)        | Biznesowe                     | Zakres obowiązujący w dniu zdarzenia (FR-CLM-01)                                                           | R/E/R/E       |
+| `Claimant__c`        | Lookup(Contact)         | PII (relacja)                 | Zgłaszający; bez kopiowania danych kontaktowych do szkody                                                  | R/R/R/E       |
+| `Incident_Date__c`   | Date                    | Biznesowe                     | Data zdarzenia                                                                                             | R/R/R/E       |
+| `Description__c`     | Long Text(5000)         | Szczególna kategoria (art. 9) | Opis zdarzenia od klienta; może zawierać dane osobowe/zdrowotne — w formularzu ostrzeżenie o minimalizacji | R/R/R/E       |
+| `Status__c`          | Picklist                | Biznesowe                     | Cykl życia (FR-CLM-02); Field History Tracking (FR-CLM-06)                                                 | R/E/R/E       |
+| `Claimed_Amount__c`  | Currency                | Wrażliwe                      | Kwota zgłoszona; Field History                                                                             | R/R/R/E       |
+| `Approved_Amount__c` | Currency                | Wrażliwe                      | Kwota zatwierdzona przez likwidatora; Field History                                                        | -/E/R/E       |
+| `Payout_Amount__c`   | Currency                | Wrażliwe                      | Kwota wypłaty, limit z FR-CLM-05; Field History. Transakcje płatnicze pozostają poza CRM                   | -/E/R/E       |
+| `External_Id__c`     | Text(50), unique, ExtId | Techniczne                    | Klucz migracji                                                                                             | R/-/-/E       |
 
 ### 3.4 `Claim_Document__c`
 
-| Pole API                   | Typ                     | Klasyfikacja | Uzasadnienie / minimalizacja                                                                                               | FLS (A/L/K) |
-| -------------------------- | ----------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `Name`                     | Text(80)                | Techniczne   | Etykieta dokumentu; nie wpisywać danych osobowych w nazwie                                                                 | R/E/E       |
-| `Claim__c`                 | Master-Detail(Claim)    | Biznesowe    | Rodzic; dziedziczenie widoczności                                                                                          | R/R/R       |
-| `Document_Type__c`         | Picklist                | Biznesowe    | Rodzaj (zdjęcie, protokół, faktura)                                                                                        | R/E/E       |
-| `External_Id__c`           | Text(50), unique, ExtId | Techniczne   | Klucz migracji                                                                                                             | R/-/-       |
-| (pliki — `ContentVersion`) | Salesforce Files        | Wrażliwe     | Treść może zawierać PII i dane zdrowotne; limit rozmiaru i typów MIME (NFR-SEC-10), widoczność przez `ContentDocumentLink` | R/R/E       |
+| Pole API                   | Typ                     | Klasyfikacja                  | Uzasadnienie / minimalizacja                                                                                               | FLS (A/L/K/I) |
+| -------------------------- | ----------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `Name`                     | Text(80)                | Techniczne                    | Etykieta dokumentu; nie wpisywać danych osobowych w nazwie                                                                 | R/R/R/E       |
+| `Claim__c`                 | Master-Detail(Claim)    | Biznesowe                     | Rodzic; dziedziczenie widoczności                                                                                          | R/R/R/E       |
+| `Document_Type__c`         | Picklist                | Biznesowe                     | Rodzaj (zdjęcie, protokół, faktura)                                                                                        | R/E/R/E       |
+| `External_Id__c`           | Text(50), unique, ExtId | Techniczne                    | Klucz migracji                                                                                                             | R/-/-/E       |
+| (pliki — `ContentVersion`) | Salesforce Files        | Szczególna kategoria (art. 9) | Treść może zawierać PII i dane zdrowotne; limit rozmiaru i typów MIME (NFR-SEC-10), widoczność przez `ContentDocumentLink` | R/R/R/E       |
 
 ### 3.5 Standardowe obiekty użyte w modelu
 
-Dane osobowe znajdują się wyłącznie w obiektach standardowych; obiekty custom odwołują się do nich relacjami, bez duplikowania.
+Dane identyfikacyjne i kontaktowe osób znajdują się tylko w `Contact` (oraz `User` dla pracowników); obiekty custom odwołują się do nich relacjami, bez duplikowania. Pośrednie identyfikatory (np. numer polisy) i swobodny tekst w obiektach custom są klasyfikowane osobno w sekcjach 3.1–3.4.
 
 | Obiekt.pole                      | Klasyfikacja     | Uwagi                                                                                        |
 | -------------------------------- | ---------------- | -------------------------------------------------------------------------------------------- |
