@@ -53,3 +53,6 @@ sfca_results.json
 
 # Code Analyzer reports
 reports/
+
+# Local coordinator handoff notes (/koordynator)
+.claude/coordinator/
