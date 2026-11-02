@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>Northwind</members>
+        <name>ExternalDataSource</name>
+    </types>
+    <types>
+        <members>Customers__x</members>
+        <name>CustomObject</name>
+    </types>
+    <types>
+        <members>Northwind_Spike</members>
+        <name>PermissionSet</name>
+    </types>
+    <version>68.0</version>
+</Package>
