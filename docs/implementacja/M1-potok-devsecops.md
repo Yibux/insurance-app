@@ -105,3 +105,16 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 - **Problemy:** brak. Uwaga: CodeQL tylko raportuje alerty; blokowanie merge'a wymaga reguły code scanning w rulesecie `main` (ustawienie repozytorium, poza kodem).
 - **Dowody:** [przebieg 41455615705](https://github.com/Yibux/insurance-app/actions/runs/41455615705) — job zielony; API `code-scanning/analyses` dla `refs/pull/106/merge` zwraca analizę narzędzia CodeQL (103 reguły, 0 wyników) obok analiz Code Analyzer i gitleaks. Ścieżka „blokuje podatny kod” nie była sprawdzana (workflow nie oblewa PR sam z siebie).
 - **Do pracy:** rozdział #83 (SAST drugiej generacji — analiza przepływu danych vs reguły wzorcowe), eksperyment M6 — porównanie wykrywalności CodeQL i Code Analyzera na tych samych wstrzykniętych podatnościach JS.
+
+### #21 Configure Dependabot and npm audit gate
+
+- **Data:** 2026-11-02 · **PR:** #107 · **Wymagania:** FR-CI-05
+- **Co zrobiono:** Dodano `.github/dependabot.yml` (cotygodniowe aktualizacje zależności npm i akcji GitHub) oraz krok `npm audit --audit-level=high` w jobie `static-checks` w `pr-validation.yml`. PR z nową podatnością o wadze high lub critical w zależnościach jest oblewany.
+- **Jak:**
+  - Dependabot: ekosystemy `npm` i `github-actions`, poniedziałek, limit 5 PR-ów, grupowanie minor/patch (npm) i wszystkich akcji, prefiksy `chore(deps)` / `chore(ci)`; `pip` dojdzie w #58.
+  - `npm audit --audit-level=high` po `npm ci --ignore-scripts`, na pełnym drzewie (z zależnościami deweloperskimi).
+  - Decyzja i alternatywy: [ADR 0006](../adr/0006-dependabot-npm-audit.md).
+- **Decyzje i alternatywy:** `dependabot.yml` plus bramka w PR zamiast samych alertów (nie blokują) lub zewnętrznego skanera SCA (zbędna zależność). Próg `high`, bo `moderate` (33 porady w narzędziach deweloperskich) zablokowałoby wszystkie PR-y bez możliwości naprawy.
+- **Problemy:** Bramka od razu byłaby czerwona: `npm audit` zgłaszał 2 porady high w zależnościach deweloperskich (`follow-redirects` 1.16.1 i `joi` 18.2.9, tranzytywnie przez `prettier-plugin-apex` → `wait-on`). Naprawa bez zmiany `package.json`: `npm update follow-redirects joi` (1.16.2 i 18.3.1, tylko `package-lock.json`). Pozostałe 45 porad (low/moderate) zostaje poniżej progu. Na Windows lokalne testy `scripts/ci` wymagają `PYTHONUTF8=1` (emoji w tabeli podsumowania), w CI (Linux) problemu nie ma.
+- **Dowody:** (uzupełnić po przebiegach CI — patrz opis PR #107)
+- **Do pracy:** rozdział #83 (analiza składu oprogramowania i łańcuch dostaw — IEEE 2025 SLR), eksperyment M6 — kategoria „podatna zależność” w katalogu wprowadzanych błędów; obserwacja, że bramka SCA wykrywa porady z bazy w danym dniu, więc ten sam commit może zmienić wynik.
