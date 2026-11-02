@@ -12,3 +12,4 @@ Każda istotna decyzja architektoniczna lub wybór narzędzia to jeden plik `NNN
 | [0006](0006-dependabot-npm-audit.md)     | Dependabot (npm, github-actions) i bramka `npm audit --audit-level=high`         | przyjęta |
 | [0007](0007-hooki-husky-commitlint.md)   | Hooki Git: Husky + lint-staged + gitleaks (pre-commit) i commitlint (commit-msg) | przyjęta |
 | [0008](0008-github-actions-vs-copado.md) | GitHub Actions + Salesforce CLI zamiast Copado jako platforma potoku CI/CD       | przyjęta |
+| [0010](0010-raporty-bramek-w-podsumowaniu-zadania.md) | Raporty bramek: podsumowanie zadania, artefakty i czasy z API Actions | przyjęta |
