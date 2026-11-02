@@ -155,4 +155,3 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 - **Problemy:** czas samego kroku raportującego i całego joba nie jest dokładny (job jeszcze trwa), co opisano w ADR. Format JSON Code Analyzera (`violationCounts`, `violations[].severity`) przyjęto z dokumentacji; skrypt ma awaryjnie liczenie z listy naruszeń — do potwierdzenia w przebiegu CI. Na Windows lokalne testy wymagają `PYTHONUTF8=1`.
 - **Dowody:** lokalnie `unittest` (24 testy), `npm run lint`, `prettier:verify` bez błędów. Przebiegi CI: **do uzupełnienia** — push wstrzymany do odnowienia limitu scratch orgów (6/6 zużyte do ok. 2026-11-02 23:45 UTC).
 - **Do pracy:** rozdział #86 (obserwowalność potoku), eksperyment M6 — czasy bramek jako zmienna zależna (czas informacji zwrotnej dla programisty). **Do aktualizacji przed 2026-12-06:** `docs/architektura/potok-cicd.md` (element #22 nie jest już „planowany”).
-
