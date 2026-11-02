@@ -22,6 +22,8 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 - **Klasyfikacja i FLS:** doprecyzowano klasyfikację (`Policy_Number__c` jako PII pośrednie, klasa „art. 9” dla opisu szkody i plików), `Premium__c` ukryta przed likwidatorem, pola Auto Number tylko do odczytu, dodano rolę użytkownika integracyjnego do macierzy FLS.
 - **Do potwierdzenia przez użytkownika (bez ADR):** agent jako właściciel polisy, Apex managed sharing dla `Claim__c` oraz klient portalu tylko do odczytu. Jeśli decyzje zostaną utrzymane, zalecany ADR przy zadaniu #32.
 
+- **Decyzje potwierdzone (2026-11-02):** właściciel pracy utrzymał decyzje z punktów B1–B3; zapisano je w [ADR 0009](../adr/0009-model-wspoldzielenia-rekordow.md) (Refs #32; implementacja w `force-app/` pozostaje w M2).
+
 #### Do rozstrzygnięcia w #30 / #31 / #32 / #33 / #35
 
 - **R1 (#31, #33):** wszystkie dokumenty szkody są widoczne dla klienta, także wewnętrzne (opinia rzeczoznawcy, notatka o podejrzeniu nadużycia). Potrzebne rozróżnienie (np. `Visible_To_Customer__c` lub wartość `Document_Type__c`) oraz `ContentDocumentLink.Visibility = InternalUsers` dla plików wewnętrznych. Usunięcie `Claim__c` kasuje `Claim_Document__c`, ale nie `ContentDocument` — osierocone pliki z PII i danymi zdrowotnymi; wymaga polityki retencji (RODO) i ograniczenia, kto może usuwać `Claim__c`.
