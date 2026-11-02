@@ -63,3 +63,17 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
   - [przebieg 41360432846](https://github.com/Yibux/insurance-app/actions/runs/41360432846) — po poprawce: `Probe` 40% → **bramka oblewa job**, artefakt zapisany, org usunięty;
   - [przebieg 41360678033](https://github.com/Yibux/insurance-app/actions/runs/41360678033) — po usunięciu klasy: brak testów Apex, kroki bramki pominięte, job zielony.
 - **Do pracy:** rozdział #83 (bramki jakości w potoku), eksperyment M6 — zmiany obniżające pokrycie jako kategoria „wprowadzonych błędów”; argument, że ślepe `RunLocalTests` może dawać fałszywie zielony wynik.
+
+### #18 Integrate Salesforce Code Analyzer v5 with severity gate and SARIF
+
+- **Data:** 2026-11-02 · **PR:** #103 · **Wymagania:** FR-CI-04, FR-CI-07, NFR-SEC-03, NFR-SEC-04
+- **Co zrobiono:** Do `pr-validation.yml` dodano job `code-analyzer`: Salesforce Code Analyzer v5 (PMD, ESLint, RetireJS, Flow Scanner, Graph Engine i reguła własna) skanuje `force-app/` i oblewa PR przy naruszeniach o wadze ≤ 2. Wyniki trafiają do GitHub code scanning (SARIF) i do artefaktu z raportem HTML.
+- **Jak:** `code-analyzer.yml` (nadpisanie `ApexSharingViolations`, reguła regex `ApexNoWithoutSharing`, ustawienia silnika Flow); `sf code-analyzer run --workspace force-app --rule-selector … --severity-threshold 2 --output-file reports/code-analyzer.sarif --output-file reports/code-analyzer.html`; `github/codeql-action/upload-sarif` (v4.39.1, SHA) z `if: always()`; uprawnienie `security-events: write` tylko dla tego joba.
+- **Decyzje i alternatywy:** zestaw `Recommended` wybranych silników uzupełniony o reguły bezpieczeństwa z wymagań zamiast „wszystkich reguł” (szum) albo samego `Recommended` (luki w sharingu) — [ADR 0004](../adr/0004-code-analyzer-rules.md). SAST nie potrzebuje orga, więc biegnie w `pr-validation.yml` dla każdego PR i nie zużywa limitu scratch orgów. Wersje CLI i pluginu przypięte.
+- **Problemy:** Domyślny zestaw `Recommended` przepuścił klasę z jawnym `without sharing` i klasę z DML bez deklaracji sharingu (NFR-SEC-03). Dodano `ApexSharingViolations` z wagą 2 i własną regułę regex. Wygenerowany CSS strony LWR daje 2 naruszenia Low; nie blokują i zostają w raporcie.
+- **Dowody:**
+  - [przebieg 41361714452](https://github.com/Yibux/insurance-app/actions/runs/41361714452) — sam `force-app/`: 2 × Low, job zielony, SARIF wysłany;
+  - [przebieg 41361891695](https://github.com/Yibux/insurance-app/actions/runs/41361891695) — tymczasowa podatna klasa: `ApexSOQLInjection` i `ApexCRUDViolation` (High) → **job oblany**, `without sharing` niewykryte;
+  - [przebieg 41362094070](https://github.com/Yibux/insurance-app/actions/runs/41362094070) — po dodaniu reguł: 5 × High (SOQL injection, 2 × CRUD, `without sharing`, brak sharingu) → job oblany;
+  - [przebieg 41362236031](https://github.com/Yibux/insurance-app/actions/runs/41362236031) — po usunięciu klas testowych: job zielony.
+- **Do pracy:** rozdział #83 (SAST w potoku, dobór reguł vs szum), eksperyment M6 — macierz „podatność → reguła → wynik” jako baza do TP/FN; argument, że domyślne zestawy reguł trzeba weryfikować pod wymagania (Bavadiya 2022).
