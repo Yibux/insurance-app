@@ -43,3 +43,55 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 - **Problemy:** `sf org create scratch` z Dev Hubem zalogowanym przez External Client App kończył się błędem `The callback URL provided is not valid` (lokalnie: `RemoteOrgSignupFailed`, kod C-1016) — serwis zakładania scratch orgów nie replikuje ECA do nowego orga. Obejście: `SF_SCRATCH_SIGNUP_CONNECTED_APP=PlatformCLI` i `SF_SCRATCH_SIGNUP_CALLBACK_URL=http://localhost:1717/OauthRedirect` w kroku tworzenia orga — przy zakładaniu orga używana jest wbudowana aplikacja CLI, a dostęp do Dev Hubu nadal idzie przez naszą ECA i JWT.
 - **Dowody:** [przebieg 41359225427](https://github.com/Yibux/insurance-app/actions/runs/41359225427): instalacja CLI 16 s, logowanie 3 s, utworzenie scratch orga 20 s, deploy (w tym strona Experience Cloud) 30 s, usunięcie orga 4 s — cały job ok. 1 min 20 s.
 - **Do pracy:** rozdział #84 (środowiska efemeryczne), pomiar czasu potoku w eksperymencie (M6, NFR-PERF-05).
+
+### #17 Run Apex tests and enforce 75% coverage gate (check_coverage.py)
+
+- **Data:** 2026-11-02 · **PR:** #102 · **Wymagania:** FR-CI-03, NFR-QA-01
+- **Co zrobiono:** Po deployu do scratch orga workflow uruchamia testy Apex z pokryciem kodu i przepuszcza wynik przez własną bramkę `scripts/ci/check_coverage.py`. Bramka oblewa PR przy nieudanych testach lub pokryciu poniżej progu (domyślnie 75%, zmienna `COVERAGE_THRESHOLD`). Surowy wynik trafia do artefaktu `apex-test-results`, a tabela pokrycia do podsumowania joba.
+- **Jak:**
+  - `sf apex run test --class-names … --code-coverage --output-dir … --json`; kod wyjścia 100 (nieudane testy) przekazywany do bramki, inne błędy przerywają job.
+  - `check_coverage.py <raport> --source-dir force-app` — pokrycie liczone ważone liniami (suma pokrytych / suma linii), opcje `--threshold`, `--per-class-threshold`, `--exclude`, `--fail-on-empty`; tabela Markdown do `$GITHUB_STEP_SUMMARY`.
+  - 16 testów jednostkowych skryptu (`unittest`, bez zależności) uruchamianych w `pr-validation.yml`.
+- **Decyzje i alternatywy:**
+  - Własna bramka zamiast polegania na platformie — Salesforce egzekwuje 75% tylko przy deployu na produkcję, w scratch orgu nie.
+  - Uruchamiane są tylko testy z repozytorium (`--class-names`), a liczone tylko klasy z `force-app/` (`--source-dir`), patrz „Problemy”.
+  - Gdy w repozytorium nie ma jeszcze testów Apex, kroki bramki są pomijane (job zielony); `--fail-on-empty` pozwoli to zaostrzyć, gdy w M2 pojawi się logika.
+  - `unittest` zamiast `pytest` — skrypt CI bez zależności instalowanych w potoku.
+- **Problemy:** Experience Cloud dodaje do scratch orga własne kontrolery z testami (`SiteRegisterController`, `CommunitiesSelfRegController` i in.). Przy `RunLocalTests` liczyły się do wyniku i zawyżały go: klasa testowa z 40% pokrycia dała łącznie 82,14% i bramka przepuściła PR. Poprawka: tylko nasze testy i tylko nasze klasy. Lokalnie nie dało się sprawdzić formatu wyniku: CLI 2.78 nie obsługuje obejścia C-1016, a nowy CLI wymaga Node 22 — weryfikacja odbyła się w CI.
+- **Dowody:**
+  - [przebieg 41360184741](https://github.com/Yibux/insurance-app/actions/runs/41360184741) — przed poprawką: tymczasowa klasa `Probe` (40%) przepuszczona przez kontrolery platformy (82,14%);
+  - [przebieg 41360432846](https://github.com/Yibux/insurance-app/actions/runs/41360432846) — po poprawce: `Probe` 40% → **bramka oblewa job**, artefakt zapisany, org usunięty;
+  - [przebieg 41360678033](https://github.com/Yibux/insurance-app/actions/runs/41360678033) — po usunięciu klasy: brak testów Apex, kroki bramki pominięte, job zielony.
+- **Do pracy:** rozdział #83 (bramki jakości w potoku), eksperyment M6 — zmiany obniżające pokrycie jako kategoria „wprowadzonych błędów”; argument, że ślepe `RunLocalTests` może dawać fałszywie zielony wynik.
+
+### #18 Integrate Salesforce Code Analyzer v5 with severity gate and SARIF
+
+- **Data:** 2026-11-02 · **PR:** #103 · **Wymagania:** FR-CI-04, FR-CI-07, NFR-SEC-03, NFR-SEC-04
+- **Co zrobiono:** Do `pr-validation.yml` dodano job `code-analyzer`: Salesforce Code Analyzer v5 (PMD, ESLint, RetireJS, Flow Scanner, Graph Engine i reguła własna) skanuje `force-app/` i oblewa PR przy naruszeniach o wadze ≤ 2. Wyniki trafiają do GitHub code scanning (SARIF) i do artefaktu z raportem HTML.
+- **Jak:** `code-analyzer.yml` (nadpisanie `ApexSharingViolations`, reguła regex `ApexNoWithoutSharing`, ustawienia silnika Flow); `sf code-analyzer run --workspace force-app --rule-selector … --severity-threshold 2 --output-file reports/code-analyzer.sarif --output-file reports/code-analyzer.html`; `github/codeql-action/upload-sarif` (v4.39.1, SHA) z `if: always()`; uprawnienie `security-events: write` tylko dla tego joba.
+- **Decyzje i alternatywy:** zestaw `Recommended` wybranych silników uzupełniony o reguły bezpieczeństwa z wymagań zamiast „wszystkich reguł” (szum) albo samego `Recommended` (luki w sharingu) — [ADR 0004](../adr/0004-code-analyzer-rules.md). SAST nie potrzebuje orga, więc biegnie w `pr-validation.yml` dla każdego PR i nie zużywa limitu scratch orgów. Wersje CLI i pluginu przypięte.
+- **Problemy:** Domyślny zestaw `Recommended` przepuścił klasę z jawnym `without sharing` i klasę z DML bez deklaracji sharingu (NFR-SEC-03). Dodano `ApexSharingViolations` z wagą 2 i własną regułę regex. Wygenerowany CSS strony LWR daje 2 naruszenia Low; nie blokują i zostają w raporcie.
+- **Dowody:**
+  - [przebieg 41361714452](https://github.com/Yibux/insurance-app/actions/runs/41361714452) — sam `force-app/`: 2 × Low, job zielony, SARIF wysłany;
+  - [przebieg 41361891695](https://github.com/Yibux/insurance-app/actions/runs/41361891695) — tymczasowa podatna klasa: `ApexSOQLInjection` i `ApexCRUDViolation` (High) → **job oblany**, `without sharing` niewykryte;
+  - [przebieg 41362094070](https://github.com/Yibux/insurance-app/actions/runs/41362094070) — po dodaniu reguł: 5 × High (SOQL injection, 2 × CRUD, `without sharing`, brak sharingu) → job oblany;
+  - [przebieg 41362236031](https://github.com/Yibux/insurance-app/actions/runs/41362236031) — po usunięciu klas testowych: job zielony.
+- **Do pracy:** rozdział #83 (SAST w potoku, dobór reguł vs szum), eksperyment M6 — macierz „podatność → reguła → wynik” jako baza do TP/FN; argument, że domyślne zestawy reguł trzeba weryfikować pod wymagania (Bavadiya 2022).
+
+### #19 Add gitleaks secret scanning in CI and pre-commit
+
+- **Data:** 2026-11-02 · **PR:** #104 · **Wymagania:** FR-CI-05, FR-CI-09, NFR-SEC-05
+- **Co zrobiono:** Dodano skanowanie sekretów gitleaks w dwóch miejscach: job `gitleaks` w `pr-validation.yml` skanuje **całą historię** repozytorium przy każdym PR (SARIF do code scanning), a hook pre-commit Husky skanuje zmiany w stage przed commitem. Konfiguracja i allowlista w `.gitleaks.toml`, procedura w [runbooku](../runbooki/skanowanie-sekretow.md).
+- **Jak:**
+  - binarka gitleaks 8.30.1 pobierana z wydania na GitHubie i weryfikowana **przypiętą sumą SHA-256** (nie plikiem sum z tego samego wydania);
+  - `gitleaks git . --config .gitleaks.toml --redact --report-format sarif` po `checkout` z `fetch-depth: 0`;
+  - `scripts/hooks/gitleaks-staged.sh` → `gitleaks git --pre-commit --staged --redact`, wywoływany z `.husky/pre-commit` przed `lint-staged`.
+- **Decyzje i alternatywy:**
+  - Binarka CLI zamiast `gitleaks/gitleaks-action` — pełna kontrola wersji i sumy kontrolnej, brak zależności od licencji akcji.
+  - Pełna historia przy każdym PR zamiast tylko commitów PR — repo jest małe (sekundy), a wykrywa też sekret dodany i usunięty w kolejnych commitach.
+  - **Autotest z kanarkiem**: job generuje w locie token w formacie GitHub PAT i wymaga, żeby gitleaks go wykrył — zepsuty skaner nie da fałszywie zielonego wyniku. Token nie trafia do historii (stały fałszywy sekret w repo psułby skan całej historii).
+  - Hook lokalny ostrzega i przepuszcza commit, gdy gitleaks nie jest zainstalowany — CI pozostaje bramką obowiązkową.
+  - `--redact` wszędzie: znaleziony sekret nie trafia do logów CI ani do SARIF.
+- **Problemy:** PR trafił w konflikt w `docs/adr/README.md` (gałąź wyrosła z `main` sprzed merge'a #98), przez co **workflowy `pull_request` w ogóle się nie uruchomiły** — GitHub nie tworzy merge refa dla PR z konfliktem. Rozwiązano przez merge `main` do #103 i przeniesienie do #104.
+- **Dowody:** [przebieg 41363508969](https://github.com/Yibux/insurance-app/actions/runs/41363508969) — suma kontrolna OK, kanarek wykryty, „26 commits scanned, no leaks found”, SARIF wysłany. <!-- commit testowy z hookiem po instalacji gitleaks lokalnie -->
+- **Do pracy:** rozdział #83 (sekrety i łańcuch dostaw — IEEE 2025 SLR), eksperyment M6 — kategoria „wyciek sekretu” w katalogu podatnych zmian (sekret generowany w eksperymencie, nie commitowany na stałe).

@@ -51,5 +51,8 @@ sfca_results.json
 *.p12
 *.pfx
 
+# Code Analyzer reports
+reports/
+
 # Local coordinator handoff notes (/koordynator)
 .claude/coordinator/
