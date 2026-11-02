@@ -6,7 +6,7 @@ Wpisy dla zadań pisarskich (`type:thesis`), pisanych równolegle z implementacj
 
 ### #81 Chapter: Introduction — motivation, goal, scope
 
-- **Data:** 2026-11-02 · **PR:** #<nr> · **Wymagania:** —
+- **Data:** 2026-11-02 · **PR:** #117 · **Wymagania:** —
 - **Co zrobiono:** Napisano roboczą (prowizoryczną) wersję rozdziału 1 „Wstęp”: tło i motywacja, problem, cel główny i cele szczegółowe, propozycja pytań badawczych PB1–PB3, zakres i ograniczenia, metoda, roboczy układ pracy (tabela 1.1). Rozdział jest oznaczony jako prowizoryczny, bo konspekt nie został uzgodniony z promotorem (#12).
 - **Jak:** [docs/praca/01-wstep.md](../praca/01-wstep.md); źródła: RAPORT.md rozdz. 1–3 (kryterium akceptacji issue), HARMONOGRAM.md (etapy, plan eksperymentu), WYMAGANIA.md, ADR 0001–0004, spike #9, dziennik M1 (#16, #17, #18, #27). Układ rozdziałów przyjęto według zadań #81–#88 z BACKLOG.md.
 - **Decyzje i alternatywy:**
