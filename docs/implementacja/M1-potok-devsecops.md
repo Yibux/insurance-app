@@ -134,10 +134,10 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 
 ### #27 Document the pipeline and write ADR GitHub Actions vs Copado
 
-- **Data:** 2026-11-02 · **PR:** <!-- numer PR --> · **Wymagania:** NFR-MNT-03
+- **Data:** 2026-11-02 · **PR:** #115 · **Wymagania:** NFR-MNT-03
 - **Co zrobiono:** Opisano potok CI/CD (diagram Mermaid jobów i bramek, tabela bramek, cechy wspólne, powiązanie z literaturą) oraz zapisano decyzję o wyborze GitHub Actions + Salesforce CLI zamiast Copado.
 - **Jak:** [docs/architektura/potok-cicd.md](../architektura/potok-cicd.md); [ADR 0008](../adr/0008-github-actions-vs-copado.md) z wierszem w indeksie ADR. Opis powstał na podstawie rzeczywistych workflowów (`pr-validation.yml`, `scratch-org-validation.yml`, `codeql.yml`) i wpisów tego logu.
 - **Decyzje i alternatywy:** GitHub Actions zamiast Copado i innych CI (powody w ADR 0008). Dokument opisuje stan faktyczny: elementy #22 (raporty) i #24 (deploy) są oznaczone jako planowane, a branch protection jako niewłączone (ruleset `main` ma tylko regułę blokady usunięcia; zadania #6 i #25). Plik leży w `docs/architektura/` zgodnie z kryteriami issue, jako nowy plik bez zmian w istniejących plikach tego katalogu (równolegle trwa #29).
 - **Problemy:** Copado nie był testowany; porównanie opiera się na dokumentacji i modelu licencyjnym, co zapisano w ADR jako ograniczenie. PR jest ułożony na #114 (#23) ze względu na wiersz ADR 0007 w indeksie i wpis #23 w tym logu.
-- **Dowody:** <!-- linki do przebiegów CI -->
+- **Dowody:** Lokalnie `npm run lint` i `prettier:verify` bez błędów. Brak przebiegów CI: PR #115 ma bazę `chore/23-husky-commitlint` (stos na #114), a workflowy startują tylko dla PR do `main`; dowód zostanie dopisany po zmianie bazy na `main`. Scratch org nie był używany (zmiany tylko w `docs/`).
 - **Do pracy:** rozdział #86 (implementacja potoku, diagram), #83 (bramki jako odpowiedź na lukę automatyzacji — Cheenepalli 2025, Bavadiya 2022), uzasadnienie wyboru narzędzia. **Do aktualizacji po merge'u #22 i #24 (przed 2026-12-06):** `potok-cicd.md` (tabela i diagram) oraz ten wpis.
