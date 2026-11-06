@@ -1,0 +1,12 @@
+row_type,label,role,head_sha,pr_validation_run,codeql_run,scratch_run,pr_validation_conclusion,codeql_conclusion,scratch_conclusion,pipeline_seconds,pr_validation_seconds,codeql_seconds,scratch_workflow_seconds,job_static_checks_s,job_gitleaks_s,job_code_analyzer_s,job_codeql_s,job_scratch_org_s,step_install_sf_cli_s,step_jwt_auth_s,step_create_org_s,step_deploy_source_s,step_apex_tests_s,step_delete_org_s,run_url_scratch
+run,B1,existing,72fb1608062814d58d797acd3968ff8191c3dd0a,42187693451,42187693431,42187693917,success,success,success,99,65,62,98,43,20,61,58,93,24,4,21,28,0,6,https://github.com/Yibux/insurance-app/actions/runs/42187693917
+run,B2,existing,64289293d6cc5ec196d1a181b9347f0ffdb54bdb,42209376592,42209376467,42209376578,success,success,success,102,67,63,102,28,18,62,58,97,21,3,25,35,1,4,https://github.com/Yibux/insurance-app/actions/runs/42209376578
+run,N1,new,9ed2b787537f802907cf9d81b87e0c20496ca25c,42299196136,42299196045,42299196052,success,success,success,108,55,56,108,33,17,52,52,103,28,4,23,33,0,6,https://github.com/Yibux/insurance-app/actions/runs/42299196052
+run,N2,new,6d1714106a10c86eb0a879b881ca111640f38d4f,42299538436,42299538437,42299538433,failure,success,success,118,66,61,118,8,17,61,56,112,26,4,22,43,0,4,https://github.com/Yibux/insurance-app/actions/runs/42299538433
+run,N3,new,4cbe20c2376cb18570f3232b88b25276a965fd40,42299871197,42299871014,42299871050,failure,success,success,87,67,63,87,7,16,62,59,82,22,2,20,26,0,4,https://github.com/Yibux/insurance-app/actions/runs/42299871050
+stat_median,n=5,,,,,,,,,102,66,62,102,28,17,61,58,97,24,4,22,33,0,4,
+stat_mean,n=5,,,,,,,,,102.8,64,61,102.6,23.8,17.6,59.6,56.6,97.4,24.2,3.4,22.2,33,0.2,4.8,
+stat_variance_sample,n=5,,,,,,,,,130.7,26,8.5,132.8,250.7,2.3,18.3,7.8,125.3,8.2,0.8,3.7,44.5,0.2,1.2,
+stat_stdev_sample,n=5,,,,,,,,,11.43,5.1,2.92,11.52,15.83,1.52,4.28,2.79,11.19,2.86,0.89,1.92,6.67,0.45,1.1,
+stat_min,n=5,,,,,,,,,87,55,56,87,7,16,52,52,82,21,2,20,26,0,4,
+stat_max,n=5,,,,,,,,,118,67,63,118,43,20,62,59,112,28,4,25,43,1,6,
