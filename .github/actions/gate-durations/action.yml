@@ -1,0 +1,45 @@
+name: Record gate durations
+description: >-
+  Reads the step timings of the running job from the Actions API, appends a
+  table to the job summary and uploads the raw rows as an artifact (FR-CI-07).
+  The calling job needs `actions: read`, a checkout of the repository and
+  should run this as its last step with `if: always()`.
+
+inputs:
+  job-name:
+    description: Display name of the calling job (the `name:` of the job).
+    required: true
+  artifact-name:
+    description: Name of the uploaded artifact.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Summarise step durations
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPOSITORY: ${{ github.repository }}
+        RUN_ID: ${{ github.run_id }}
+        RUN_ATTEMPT: ${{ github.run_attempt }}
+        JOB_NAME: ${{ inputs.job-name }}
+      run: |
+        mkdir -p "$RUNNER_TEMP/durations"
+        # Timing is best effort: an API hiccup must not fail a gate.
+        if ! gh api "repos/${REPOSITORY}/actions/runs/${RUN_ID}/attempts/${RUN_ATTEMPT}/jobs?per_page=100" \
+          > "$RUNNER_TEMP/durations/jobs.json"; then
+          echo "::warning::Could not read job timings from the Actions API."
+          echo '{}' > "$RUNNER_TEMP/durations/jobs.json"
+        fi
+        python3 "$GITHUB_WORKSPACE/scripts/ci/gate_report.py" durations \
+          "$RUNNER_TEMP/durations/jobs.json" \
+          --job-name "$JOB_NAME" \
+          --output "$RUNNER_TEMP/durations/durations.json"
+
+    - name: Upload durations
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ runner.temp }}/durations/durations.json
+        retention-days: 14

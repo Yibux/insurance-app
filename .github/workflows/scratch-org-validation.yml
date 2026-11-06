@@ -30,6 +30,9 @@ jobs:
     name: Deploy to scratch org
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    permissions:
+      contents: read
+      actions: read # step timings for the duration report
     environment: devhub
     # One scratch org job at a time across the repository: Developer Edition
     # allows 3 active and 6 new scratch orgs per day.
@@ -129,6 +132,10 @@ jobs:
         if: steps.apex.outputs.ran == 'true'
         run: python3 scripts/ci/check_coverage.py "$RUNNER_TEMP/apex-results/sf-apex-run-test.json" --source-dir force-app
 
+      - name: Apex test results summary
+        if: always() && steps.apex.outputs.ran == 'true'
+        run: python3 scripts/ci/gate_report.py apex-tests "$RUNNER_TEMP/apex-results/sf-apex-run-test.json"
+
       - name: Upload Apex test results
         if: always() && steps.apex.outputs.ran == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -151,3 +158,10 @@ jobs:
         run: |
           rm -f "$RUNNER_TEMP/devhub.key"
           sf org logout --all --no-prompt > /dev/null 2>&1 || true
+
+      - name: Record gate durations
+        if: always()
+        uses: ./.github/actions/gate-durations
+        with:
+          job-name: Deploy to scratch org
+          artifact-name: gate-durations-scratch-org
