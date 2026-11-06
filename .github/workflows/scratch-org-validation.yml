@@ -8,6 +8,8 @@ on:
       - "config/**"
       - "sfdx-project.json"
       - "scripts/ci/check_coverage.py"
+      - "scripts/ci/gate_report.py"
+      - ".github/actions/gate-durations/**"
       - ".github/workflows/scratch-org-validation.yml"
 
 permissions:

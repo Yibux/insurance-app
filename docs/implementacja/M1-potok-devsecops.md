@@ -165,3 +165,18 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 - **Problemy:** Lokalnie zainstalowany Node 21 jest poniżej `engines` (ostrzeżenie `npm`); wymaga aktualizacji lokalnego Node.
 - **Dowody:** lokalnie `npm run lint` i `prettier:verify`; przebiegi CI w opisie PR. Scratch org nie był używany (brak zmian w ścieżkach wyzwalających).
 - **Do pracy:** rozdział #83 (shift-left: ograniczenia kontroli lokalnych, powtarzalność środowiska narzędziowego).
+
+### Poprawki z przeglądu bezpieczeństwa PR #119 (część #22)
+
+- **Data:** 2026-11-06 · **PR:** zob. historia PR (ułożony na #119) · **Wymagania:** FR-CI-07, NFR-OBS-02
+- **Co zrobiono:** Drobne poprawki po przeglądzie bezpieczeństwa raportów z #22, bez własnego issue (`Refs #22`).
+- **Jak:**
+  - `gitleaks-report`: retencja 14 -> 3 dni; w [ADR 0010](../adr/0010-raporty-bramek-w-podsumowaniu-zadania.md) dopisano obowiązek rotacji wykrytego sekretu;
+  - odporność raportowania: `gate-durations` kończy się ostrzeżeniem (`|| echo "::warning::..."`), `gate_report.py` używa `.get("name", "?")` i traktuje uszkodzony JSON jak brak pliku (3 nowe testy, razem 27);
+  - `scratch-org-validation.yml`: do `paths` dodano `scripts/ci/gate_report.py` i `.github/actions/gate-durations/**`;
+  - `dependabot.yml`: `github-actions` skanuje `directories` `/` i `/.github/actions/*` (akcja lokalna ma własny `action.yml`);
+  - kosmetyka: rozbite sklejone `--output-file`, `GH_TOKEN` ustawiany tylko dla `gh api`, escapowanie `|` i backticków w komórkach tabel.
+- **Decyzje i alternatywy:** zawężenie `GH_TOKEN` do polecenia zamiast całego kroku; escapowanie `|` jako `\|` (poprawny Markdown) zamiast dotychczasowej zamiany na `/`.
+- **Problemy:** Zmiana `paths` w workflow scratch org sprawia, że ten PR zużyje jeden scratch org. Po squashu #119 ten PR może wymagać rebase lub merge `main`.
+- **Dowody:** lokalnie `unittest` (27 testów, `PYTHONUTF8=1`), `npm run lint`, `prettier:verify` bez błędów. Przebiegi CI: uzupełnione w opisie PR.
+- **Do pracy:** rozdział #83 (higiena artefaktów z wynikami skanów sekretów).

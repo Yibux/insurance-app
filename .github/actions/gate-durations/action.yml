@@ -19,7 +19,6 @@ runs:
     - name: Summarise step durations
       shell: bash
       env:
-        GH_TOKEN: ${{ github.token }}
         REPOSITORY: ${{ github.repository }}
         RUN_ID: ${{ github.run_id }}
         RUN_ATTEMPT: ${{ github.run_attempt }}
@@ -27,7 +26,7 @@ runs:
       run: |
         mkdir -p "$RUNNER_TEMP/durations"
         # Timing is best effort: an API hiccup must not fail a gate.
-        if ! gh api "repos/${REPOSITORY}/actions/runs/${RUN_ID}/attempts/${RUN_ATTEMPT}/jobs?per_page=100" \
+        if ! GH_TOKEN='${{ github.token }}' gh api "repos/${REPOSITORY}/actions/runs/${RUN_ID}/attempts/${RUN_ATTEMPT}/jobs?per_page=100" \
           > "$RUNNER_TEMP/durations/jobs.json"; then
           echo "::warning::Could not read job timings from the Actions API."
           echo '{}' > "$RUNNER_TEMP/durations/jobs.json"
@@ -35,7 +34,8 @@ runs:
         python3 "$GITHUB_WORKSPACE/scripts/ci/gate_report.py" durations \
           "$RUNNER_TEMP/durations/jobs.json" \
           --job-name "$JOB_NAME" \
-          --output "$RUNNER_TEMP/durations/durations.json"
+          --output "$RUNNER_TEMP/durations/durations.json" \
+          || echo "::warning::Duration report failed"
 
     - name: Upload durations
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
