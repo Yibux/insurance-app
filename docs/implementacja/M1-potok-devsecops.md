@@ -141,3 +141,13 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 - **Problemy:** Copado nie był testowany; porównanie opiera się na dokumentacji i modelu licencyjnym, co zapisano w ADR jako ograniczenie. PR jest ułożony na #114 (#23) ze względu na wiersz ADR 0007 w indeksie i wpis #23 w tym logu.
 - **Dowody:** Lokalnie `npm run lint` i `prettier:verify` bez błędów. Po zmergowaniu #114 baza PR #115 zmieniona na `main`, a main scalony do gałęzi; CI na 810c2f6: [PR validation 41485686246](https://github.com/Yibux/insurance-app/actions/runs/41485686246) (zielony), [CodeQL 41485686235](https://github.com/Yibux/insurance-app/actions/runs/41485686235) (zielony). Scratch org nie był używany (zmiany tylko w `docs/`).
 - **Do pracy:** rozdział #86 (implementacja potoku, diagram), #83 (bramki jako odpowiedź na lukę automatyzacji — Cheenepalli 2025, Bavadiya 2022), uzasadnienie wyboru narzędzia. **Do aktualizacji po merge'u #22 i #24 (przed 2026-12-06):** `potok-cicd.md` (tabela i diagram) oraz ten wpis.
+
+### Chore (Refs #23): poprawki po przeglądzie PR #114
+
+- **Data:** 2026-11-06 · **PR:** patrz nagłówek PR (chore bez własnego issue, `Refs #23`) · **Wymagania:** FR-CI-09
+- **Co zrobiono:** Trzy drobne poprawki po przeglądzie #114: plik `.nvmrc` i pole `engines` w `package.json`, doprecyzowanie runbooka hooków (CI nie sprawdza komunikatów commitów), ograniczenie anulowania przebiegów CodeQL do PR-ów.
+- **Jak:** `.nvmrc` = `22.12.0`; `engines.node` = `>=22.12.0` (wymóg `@commitlint/cli` 21; `lint-staged` 15 wymaga `>=18.12`, `husky` 9 `>=18`, więc minimum wyznacza commitlint). Workflowy w CI używają `node-version: 22` (najnowsze 22.x), zgodnie z `engines`, więc nie zmieniano ich. W `codeql.yml` `cancel-in-progress` ma wartość `${{ github.event_name == 'pull_request' }}` (grupa współbieżności bez zmian), dzięki czemu przebiegi bazowe na `main` i harmonogram nie są anulowane. Poprawiono [hooki-git.md](../runbooki/hooki-git.md).
+- **Decyzje i alternatywy:** `.nvmrc` ze ściśle określoną wersją minimalną zamiast `22`/`lts/*` (powtarzalność lokalna); ujednolicenie CI do `.nvmrc` (`node-version-file`) pominięto, bo zmieniałoby wszystkie workflowy, w tym scratch-org (budżet orgów). Można to zrobić osobno.
+- **Problemy:** Lokalnie zainstalowany Node 21 jest poniżej `engines` (ostrzeżenie `npm`); wymaga aktualizacji lokalnego Node.
+- **Dowody:** lokalnie `npm run lint` i `prettier:verify`; przebiegi CI w opisie PR. Scratch org nie był używany (brak zmian w ścieżkach wyzwalających).
+- **Do pracy:** rozdział #83 (shift-left: ograniczenia kontroli lokalnych, powtarzalność środowiska narzędziowego).
