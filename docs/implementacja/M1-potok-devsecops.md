@@ -144,7 +144,7 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 
 ### #22 Publish test and scan reports as PR job summary and artifacts
 
-- **Data:** 2026-11-02 · **PR:** (uzupełnić po otwarciu) · **Wymagania:** FR-CI-07, NFR-OBS-02
+- **Data:** 2026-11-02 · **PR:** #119 · **Wymagania:** FR-CI-07, NFR-OBS-02
 - **Co zrobiono:** Każda bramka zostawia teraz czytelne podsumowanie w zakładce przebiegu (wyniki testów Apex, pokrycie, liczby naruszeń Code Analyzera wg wagi, czasy kroków) oraz surowe raporty w artefaktach. Czasy trwania każdej bramki są zapisywane jako dane wejściowe eksperymentu.
 - **Jak:**
   - `scripts/ci/gate_report.py` (+ `test_gate_report.py`): podkomendy `apex-tests`, `code-analyzer`, `durations`; zapis do `$GITHUB_STEP_SUMMARY`, odporne na brak pliku wejściowego;
@@ -152,6 +152,6 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
   - `scratch-org-validation.yml`: krok „Apex test results summary” (tabela obok istniejącej tabeli pokrycia z `check_coverage.py`);
   - `pr-validation.yml`: Code Analyzer zapisuje dodatkowo `code-analyzer.json` (liczby wg wagi w podsumowaniu), raport gitleaks jako artefakt `gitleaks-report`; jobom dodano `actions: read`.
 - **Decyzje i alternatywy:** czasy z API zamiast własnych znaczników w każdym kroku lub zewnętrznej akcji — [ADR 0010](../adr/0010-raporty-bramek-w-podsumowaniu-zadania.md).
-- **Problemy:** czas samego kroku raportującego i całego joba nie jest dokładny (job jeszcze trwa), co opisano w ADR. Format JSON Code Analyzera (`violationCounts`, `violations[].severity`) przyjęto z dokumentacji; skrypt ma awaryjnie liczenie z listy naruszeń — do potwierdzenia w przebiegu CI. Na Windows lokalne testy wymagają `PYTHONUTF8=1`.
-- **Dowody:** lokalnie `unittest` (24 testy), `npm run lint`, `prettier:verify` bez błędów. Przebiegi CI: **do uzupełnienia** — push wstrzymany do odnowienia limitu scratch orgów (6/6 zużyte do ok. 2026-11-02 23:45 UTC).
+- **Problemy:** czas samego kroku raportującego i całego joba nie jest dokładny (job jeszcze trwa), co opisano w ADR. Format JSON Code Analyzera (`violationCounts.sev1..sev5`, `violations[].severity`) przyjęto z dokumentacji i potwierdzono w przebiegu CI (podsumowanie z 2 naruszeniami wagi 4). W kroku Code Analyzer dwa argumenty `--output-file` trafiły do jednej linii (kosmetyka, działa). Na Windows lokalne testy wymagają `PYTHONUTF8=1`.
+- **Dowody:** lokalnie `unittest` (24 testy), `npm run lint`, `prettier:verify` bez błędów. Przebiegi CI (wszystkie zielone): [PR validation 42187693451](https://github.com/Yibux/insurance-app/actions/runs/42187693451) — artefakty `code-analyzer-report` (html, json, sarif), `gitleaks-report`, `gate-durations-{static-checks,gitleaks,code-analyzer}`, podsumowanie Code Analyzera i tabela czasów w logu; [Scratch org validation 42187693917](https://github.com/Yibux/insurance-app/actions/runs/42187693917) — `gate-durations-scratch-org`. `gh api` z `actions: read` działa. Krok „Apex test results summary” i artefakt `apex-test-results` zostały pominięte, bo repozytorium nie ma jeszcze klas testowych Apex (niezweryfikowane w CI).
 - **Do pracy:** rozdział #86 (obserwowalność potoku), eksperyment M6 — czasy bramek jako zmienna zależna (czas informacji zwrotnej dla programisty). **Do aktualizacji przed 2026-12-06:** `docs/architektura/potok-cicd.md` (element #22 nie jest już „planowany”).
