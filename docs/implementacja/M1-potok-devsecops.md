@@ -155,3 +155,18 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 - **Problemy:** czas samego kroku raportującego i całego joba nie jest dokładny (job jeszcze trwa), co opisano w ADR. Format JSON Code Analyzera (`violationCounts.sev1..sev5`, `violations[].severity`) przyjęto z dokumentacji i potwierdzono w przebiegu CI (podsumowanie z 2 naruszeniami wagi 4). W kroku Code Analyzer dwa argumenty `--output-file` trafiły do jednej linii (kosmetyka, działa). Na Windows lokalne testy wymagają `PYTHONUTF8=1`.
 - **Dowody:** lokalnie `unittest` (24 testy), `npm run lint`, `prettier:verify` bez błędów. Przebiegi CI (wszystkie zielone): [PR validation 42187693451](https://github.com/Yibux/insurance-app/actions/runs/42187693451) — artefakty `code-analyzer-report` (html, json, sarif), `gitleaks-report`, `gate-durations-{static-checks,gitleaks,code-analyzer}`, podsumowanie Code Analyzera i tabela czasów w logu; [Scratch org validation 42187693917](https://github.com/Yibux/insurance-app/actions/runs/42187693917) — `gate-durations-scratch-org`. `gh api` z `actions: read` działa. Krok „Apex test results summary” i artefakt `apex-test-results` zostały pominięte, bo repozytorium nie ma jeszcze klas testowych Apex (niezweryfikowane w CI).
 - **Do pracy:** rozdział #86 (obserwowalność potoku), eksperyment M6 — czasy bramek jako zmienna zależna (czas informacji zwrotnej dla programisty). **Do aktualizacji przed 2026-12-06:** `docs/architektura/potok-cicd.md` (element #22 nie jest już „planowany”).
+
+### Poprawki z przeglądu bezpieczeństwa PR #119 (część #22)
+
+- **Data:** 2026-11-06 · **PR:** zob. historia PR (ułożony na #119) · **Wymagania:** FR-CI-07, NFR-OBS-02
+- **Co zrobiono:** Drobne poprawki po przeglądzie bezpieczeństwa raportów z #22, bez własnego issue (`Refs #22`).
+- **Jak:**
+  - `gitleaks-report`: retencja 14 -> 3 dni; w [ADR 0010](../adr/0010-raporty-bramek-w-podsumowaniu-zadania.md) dopisano obowiązek rotacji wykrytego sekretu;
+  - odporność raportowania: `gate-durations` kończy się ostrzeżeniem (`|| echo "::warning::..."`), `gate_report.py` używa `.get("name", "?")` i traktuje uszkodzony JSON jak brak pliku (3 nowe testy, razem 27);
+  - `scratch-org-validation.yml`: do `paths` dodano `scripts/ci/gate_report.py` i `.github/actions/gate-durations/**`;
+  - `dependabot.yml`: `github-actions` skanuje `directories` `/` i `/.github/actions/*` (akcja lokalna ma własny `action.yml`);
+  - kosmetyka: rozbite sklejone `--output-file`, `GH_TOKEN` ustawiany tylko dla `gh api`, escapowanie `|` i backticków w komórkach tabel.
+- **Decyzje i alternatywy:** zawężenie `GH_TOKEN` do polecenia zamiast całego kroku; escapowanie `|` jako `\|` (poprawny Markdown) zamiast dotychczasowej zamiany na `/`.
+- **Problemy:** Zmiana `paths` w workflow scratch org sprawia, że ten PR zużyje jeden scratch org. Po squashu #119 ten PR może wymagać rebase lub merge `main`.
+- **Dowody:** lokalnie `unittest` (27 testów, `PYTHONUTF8=1`), `npm run lint`, `prettier:verify` bez błędów. Przebiegi CI: uzupełnione w opisie PR.
+- **Do pracy:** rozdział #83 (higiena artefaktów z wynikami skanów sekretów).

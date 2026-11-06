@@ -20,7 +20,11 @@ updates:
           - patch
 
   - package-ecosystem: github-actions
-    directory: /
+    # Workflows live in /.github/workflows; local composite actions need
+    # their own directories to be scanned.
+    directories:
+      - /
+      - /.github/actions/*
     schedule:
       interval: weekly
       day: monday

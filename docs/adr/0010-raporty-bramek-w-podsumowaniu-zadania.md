@@ -24,5 +24,7 @@ Opcja 3. Skrypt `scripts/ci/gate_report.py` (biblioteka standardowa, z testami) 
 - Czas ostatniego kroku (samego raportowania) jest zapisany jako „running”, a czas całego joba to czas do chwili raportu — niedokładność rzędu sekund, akceptowalna dla eksperymentu.
 - Błąd API nie oblewa bramki (ostrzeżenie i pusta tabela).
 - Pokrycie nadal raportuje `check_coverage.py` (tabela per klasa).
-- Akcja lokalna nie jest objęta Dependabotem dla `github-actions` w katalogu `/`; jej zależność (`upload-artifact`) ma ten sam SHA co workflowy.
+- Akcja lokalna jest objęta Dependabotem dla `github-actions` (`directories`: `/` i `/.github/actions/*`); jej zależność (`upload-artifact`) ma ten sam SHA co workflowy.
+- Raport `gitleaks-report` (SARIF, `--redact`) ma retencję 3 dni, bo dotyczy wykrytych sekretów; pozostałe artefakty 14 dni. Wykrycie sekretu wymaga jego rotacji (unieważnienia i wydania nowego), a nie tylko usunięcia z historii gita lub raportu: repozytorium jest publiczne, a sekret mógł zostać już skopiowany.
+- Krok raportujący jest best effort: błąd skryptu raportu (np. uszkodzony JSON) kończy się ostrzeżeniem, nie czerwoną bramką.
 - Dokument potoku (`docs/architektura/potok-cicd.md`) wymaga aktualizacji przed 2026-12-06.

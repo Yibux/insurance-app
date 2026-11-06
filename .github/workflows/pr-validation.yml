@@ -121,7 +121,7 @@ jobs:
         with:
           name: gitleaks-report
           path: reports/gitleaks.sarif
-          retention-days: 14
+          retention-days: 3
 
       - name: Record gate durations
         if: always()
@@ -176,7 +176,8 @@ jobs:
             --rule-selector "regex:ApexNoWithoutSharing" \
             --severity-threshold "$SEVERITY_THRESHOLD" \
             --output-file reports/code-analyzer.sarif \
-            --output-file reports/code-analyzer.html             --output-file reports/code-analyzer.json \
+            --output-file reports/code-analyzer.html \
+            --output-file reports/code-analyzer.json \
             --view table
 
       - name: Code Analyzer summary

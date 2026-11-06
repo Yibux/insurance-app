@@ -30,7 +30,7 @@ class ApexTestsTest(unittest.TestCase):
         out = gr.render_apex_tests(data)
         self.assertIn("failed", out)
         self.assertIn("| 4 | 3 | 1 | 0 | 120 ms | 80% |", out)
-        self.assertIn("`A.bad` | boom / pipe", out)
+        self.assertIn("`A.bad` | boom \\| pipe", out)
 
 
 class CodeAnalyzerTest(unittest.TestCase):
@@ -93,6 +93,25 @@ class DurationsTest(unittest.TestCase):
             src.write_text(json.dumps(self.JOBS), encoding="utf-8")
             gr.main(["durations", str(src), "--job-name", "Gate", "--output", str(dst)])
             self.assertEqual(len(json.loads(dst.read_text(encoding="utf-8"))), 3)
+
+
+class RobustnessTest(unittest.TestCase):
+    def test_invalid_json_is_treated_as_missing(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            bad = Path(tmp, "bad.json")
+            bad.write_text("{not json", encoding="utf-8")
+            self.assertIsNone(gr.load_json(bad))
+
+    def test_missing_names_do_not_raise(self):
+        rows = gr.step_durations({"jobs": [{"steps": [{"conclusion": "success"}]}]}, None)
+        self.assertEqual([r["job"] for r in rows], ["?", "?"])
+        self.assertEqual(rows[1]["step"], "?")
+
+    def test_table_cells_are_escaped(self):
+        out = gr.render_durations([{"job": "a|b", "step": "run `x`", "seconds": 1}])
+        self.assertIn("| a\\|b | run 'x' | 1 s |", out)
+        data = {"tests": [{"Outcome": "Fail", "FullName": "A.b", "Message": "x | y `z`"}]}
+        self.assertIn("x \\| y 'z'", gr.render_apex_tests(data))
 
 
 if __name__ == "__main__":

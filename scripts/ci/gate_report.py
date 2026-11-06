@@ -27,7 +27,17 @@ SEVERITY_NAMES = {1: "Critical", 2: "High", 3: "Moderate", 4: "Low", 5: "Info"}
 def load_json(path: Path) -> dict | None:
     if not path.is_file():
         return None
-    return json.loads(path.read_text(encoding="utf-8"))
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError:
+        print(f"::warning::{path} is not valid JSON; report skipped", file=sys.stderr)
+        return None
+
+
+def cell(value: object) -> str:
+    """Escapes text for a Markdown table cell."""
+    text = str(value).replace("|", "\\|").replace("`", "'")
+    return " ".join(text.split())
 
 
 def render_apex_tests(data: dict | None) -> str:
@@ -54,7 +64,7 @@ def render_apex_tests(data: dict | None) -> str:
         lines += ["", "| Failed test | Message |", "| --- | --- |"]
         for test in failed:
             first_line = (str(test.get("Message") or "").splitlines() or [""])[0]
-            lines.append(f"| `{test.get('FullName', 'unknown')}` | {first_line.replace('|', '/')} |")
+            lines.append(f"| `{cell(test.get('FullName', 'unknown'))}` | {cell(first_line)} |")
     return "\n".join(lines) + "\n"
 
 
@@ -104,12 +114,12 @@ def step_durations(data: dict, job_name: str | None) -> list[dict]:
         # The calling job is still running when this report is built, so its
         # total is the time elapsed up to this step.
         end = job.get("completed_at") or datetime.now(timezone.utc).isoformat()
-        rows.append({"job": job["name"], "step": "(job total)", "seconds": _seconds(job.get("started_at"), end)})
+        rows.append({"job": job.get("name", "?"), "step": "(job total)", "seconds": _seconds(job.get("started_at"), end)})
         for step in job.get("steps") or []:
             if step.get("conclusion") == "skipped":
                 continue
             seconds = _seconds(step.get("started_at"), step.get("completed_at"))
-            rows.append({"job": job["name"], "step": step["name"], "seconds": seconds})
+            rows.append({"job": job.get("name", "?"), "step": step.get("name", "?"), "seconds": seconds})
     return rows
 
 
@@ -118,7 +128,7 @@ def render_durations(rows: list[dict]) -> str:
     for row in rows:
         seconds = row["seconds"]
         shown = "running" if seconds is None else f"{seconds:.0f} s"
-        lines.append(f"| {row['job']} | {row['step']} | {shown} |")
+        lines.append(f"| {cell(row['job'])} | {cell(row['step'])} | {shown} |")
     return "\n".join(lines) + "\n"
 
 
