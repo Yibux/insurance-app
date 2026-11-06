@@ -19,4 +19,4 @@ echo "feat(claims): add guard (#42)" | npx --no commitlint
 
 - Hook nie uruchamia się: sprawdź `git config core.hooksPath` (powinno być `.husky/_`); napraw przez `npm run prepare`.
 - Brak gitleaks: skan jest pomijany z ostrzeżeniem, instalacja w [skanowanie-sekretow.md](skanowanie-sekretow.md).
-- Pominięcie hooków (`--no-verify`) nie omija CI — te same kontrole biegną w `pr-validation.yml`.
+- Pominięcie hooków (`--no-verify`) nie omija CI dla kodu: kontrole Prettier, ESLint i gitleaks biegną ponownie w `pr-validation.yml`. Wyjątek: CI nie sprawdza komunikatów commitów — commitlint działa tylko lokalnie w hooku `commit-msg`, więc przy `--no-verify` niepoprawny komunikat przejdzie bez ostrzeżenia.
