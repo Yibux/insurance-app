@@ -34,7 +34,9 @@ SHARED_PATHS = (
     "config/",
     "scripts/ci/check_coverage.py",
     "scripts/ci/gate_report.py",
+    "scripts/ci/delta_plan.py",
     ".github/actions/gate-durations/",
+    ".github/workflows/scratch-org-validation.yml",
 )
 
 # Metadata folders (under force-app/main/default/) that the Apex tests
