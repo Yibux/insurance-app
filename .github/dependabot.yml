@@ -13,6 +13,13 @@ updates:
       - area:security
     cooldown:
       default-days: 7
+    ignore:
+      # @salesforce/eslint-config-lwc 3.x has a peer dependency on
+      # eslint-plugin-lightning ^1.0.0, so a 2.x bump breaks `npm ci` (ERESOLVE,
+      # see #126). Wait for eslint-config-lwc 4.x (#109) and bump both together.
+      - dependency-name: "@salesforce/eslint-plugin-lightning"
+        update-types:
+          - "version-update:semver-major"
     groups:
       npm-minor-patch:
         update-types:
