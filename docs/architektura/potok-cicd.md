@@ -82,6 +82,8 @@ Krok `Plan deployment` (`scripts/ci/delta_plan.py`, testy `test_delta_plan.py`) 
 | pusta lub duża delta (> 200 plików albo > 50% plików), usunięcie lub zmiana nazwy pliku, jakakolwiek zmiana poza `lwc/` i `aura/` | pełny                      |
 | błąd wdrożenia delty (np. brakująca niezmieniona zależność w pustym orgu)                                                         | pełny deploy jako fallback |
 
+Planista jest uruchamiany z commita bazowego (PR nie może wybrać trybu dla siebie), a zmiana `.github/` lub `scripts/ci/` zawsze daje pełny deploy. Delta zakłada, że baza przeszła pełną walidację; wymusi to dopiero #25/#6.
+
 Code Analyzer nadal skanuje całe `force-app/` (osobny job, bez scratch orga). Podsumowanie przebiegu (`Deployment mode`) podaje wybrany tryb, powód i informację o pominięciu testów. Czasy trybów delta i pełnego, jako dane eksperymentu M6, są w `docs/experiment/results/delta.csv`.
 
 ## Raporty, artefakty i czasy bramek
