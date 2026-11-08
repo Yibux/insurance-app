@@ -14,3 +14,4 @@ Każda istotna decyzja architektoniczna lub wybór narzędzia to jeden plik `NNN
 | [0008](0008-github-actions-vs-copado.md)              | GitHub Actions + Salesforce CLI zamiast Copado jako platforma potoku CI/CD                                   | przyjęta |
 | [0009](0009-model-wspoldzielenia-rekordow.md)         | Model współdzielenia: agent jako właściciel polisy, Apex managed sharing dla szkód, klient portalu read-only | przyjęta |
 | [0010](0010-raporty-bramek-w-podsumowaniu-zadania.md) | Raporty bramek: podsumowanie zadania, artefakty i czasy z API Actions                                        | przyjęta |
+| [0011](0011-delta-deployment.md)                      | Delta deployment w walidacji scratch orga: własny diff zamiast sfdx-git-delta, pełny deploy jako domyślny    | przyjęta |

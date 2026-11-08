@@ -39,21 +39,15 @@ SHARED_PATHS = (
     ".github/workflows/scratch-org-validation.yml",
 )
 
-# Metadata folders (under force-app/main/default/) that the Apex tests
-# cannot depend on: only a change confined to these may skip the Apex tests and
-# the coverage gate. Everything else (classes, triggers, objects, flows,
-# permission sets, ...) can change test outcomes and forces a full deployment.
-DELTA_ELIGIBLE_FOLDERS = frozenset(
-    {
-        "lwc",
-        "aura",
-        "digitalExperiences",
-        "digitalExperienceConfigs",
-        "navigationMenus",
-        "networks",
-        "sites",
-    }
-)
+# Metadata folders (under force-app/main/default/) eligible for a delta deploy.
+# They are self-contained bundles that Apex tests cannot depend on, so a change
+# confined to them may skip the Apex tests and the coverage gate. Everything
+# else (classes, triggers, objects, flows, permission sets, ...) can change test
+# outcomes and forces a full deployment. Experience Cloud metadata
+# (digitalExperiences, networks, sites, ...) is deliberately absent: a bundle
+# deployed alone is rejected by an empty scratch org ("workspace doesn't
+# exist", observed in CI run 42505086736).
+DELTA_ELIGIBLE_FOLDERS = frozenset({"lwc", "aura"})
 
 MAX_CHANGED_FILES = 200
 MAX_CHANGED_RATIO = 0.5

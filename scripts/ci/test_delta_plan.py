@@ -36,7 +36,7 @@ class ParseTests(unittest.TestCase):
 
 class PlanTests(unittest.TestCase):
     def test_ui_only_is_delta(self):
-        result = dp.plan([mod(LWC), dp.Change("A", "force-app/main/default/sites/S.site-meta.xml")], 100)
+        result = dp.plan([mod(LWC), dp.Change("A", "force-app/main/default/aura/Page/Page.cmp")], 100)
         self.assertEqual(result.mode, "delta")
         self.assertEqual(len(result.paths), 2)
 
@@ -50,6 +50,10 @@ class PlanTests(unittest.TestCase):
 
     def test_objects_force_full(self):
         path = "force-app/main/default/objects/A__c/A__c.object-meta.xml"
+        self.assertEqual(dp.plan([mod(path)], 100).mode, "full")
+
+    def test_experience_cloud_forces_full(self):
+        path = "force-app/main/default/digitalExperiences/site/S/sfdc_cms__styles/x/styles.css"
         self.assertEqual(dp.plan([mod(path)], 100).mode, "full")
 
     def test_unknown_layout_forces_full(self):
