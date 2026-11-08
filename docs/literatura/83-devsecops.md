@@ -10,15 +10,15 @@ Ograniczenie narzędzi: nie dało się odczytać plików PDF (IEEE Xplore zwraca
 
 ## 1. Podsumowanie weryfikacji siedmiu źródeł planowanych
 
-| Źródło z RAPORT.md | Status | Najważniejsza uwaga |
-| --- | --- | --- |
-| Cheenepalli i in. 2025 | zweryfikowane (abstrakt) | Liczby 405 / 73% / 12% potwierdzone w abstrakcie arXiv. Praca ma też wersję konferencyjną IEEE ISDFS 2025. |
-| IEEE 2025 SLR | zweryfikowane (abstrakt), **autorzy nieznani w RAPORT.md** | To Bautista Ramos i Yoo, IEEE Access vol. 13; „62 artykuły z lat 2016-2025" i lista zagrożeń potwierdzone. |
-| IEEE/ACM 2022 | zweryfikowane **z błędem w cytacie** | Praca istnieje (Wang i in., ICPC 2022), ale cytat mówi o „30 fixed/confirmed", a abstrakt podaje **24**. Cytatu nie używać. |
-| Lakade 2025 | zweryfikowane częściowo | Praca istnieje (JICRCR, 2025). Fraza „zero-touch approach fundamentally reduces attack surfaces" potwierdzona; **OIDC nie występuje** na stronie artykułu. |
-| Shift Left 2025 | zweryfikowane częściowo | Autorzy: Malik i Prashasti, ESISCS 2025. **Cytat z RAPORT.md nie występuje** w opisie na stronie czasopisma. |
-| Jammeh 2020 | częściowo | Autor i tytuł potwierdzone (ResearchGate, kopia w ISTQB); cytat potwierdzony tylko przez fragmenty wyszukiwarki. Brak recenzowanego wydawcy. |
-| Bavadiya 2022 | **słabe, nie zweryfikowano** | Rok 2022 podejrzany (PDF utworzony we wrześniu 2025, ID ResearchGate z 2025). Liczby 93,64% i cytatu nie znaleziono. Opis w RAPORT.md („matematycznie udowadnia") nie jest poparty. |
+| Źródło z RAPORT.md     | Status                                                     | Najważniejsza uwaga                                                                                                                                                                 |
+| ---------------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cheenepalli i in. 2025 | zweryfikowane (abstrakt)                                   | Liczby 405 / 73% / 12% potwierdzone w abstrakcie arXiv. Praca ma też wersję konferencyjną IEEE ISDFS 2025.                                                                          |
+| IEEE 2025 SLR          | zweryfikowane (abstrakt), **autorzy nieznani w RAPORT.md** | To Bautista Ramos i Yoo, IEEE Access vol. 13; „62 artykuły z lat 2016-2025" i lista zagrożeń potwierdzone.                                                                          |
+| IEEE/ACM 2022          | zweryfikowane **z błędem w cytacie**                       | Praca istnieje (Wang i in., ICPC 2022), ale cytat mówi o „30 fixed/confirmed", a abstrakt podaje **24**. Cytatu nie używać.                                                         |
+| Lakade 2025            | zweryfikowane częściowo                                    | Praca istnieje (JICRCR, 2025). Fraza „zero-touch approach fundamentally reduces attack surfaces" potwierdzona; **OIDC nie występuje** na stronie artykułu.                          |
+| Shift Left 2025        | zweryfikowane częściowo                                    | Autorzy: Malik i Prashasti, ESISCS 2025. **Cytat z RAPORT.md nie występuje** w opisie na stronie czasopisma.                                                                        |
+| Jammeh 2020            | częściowo                                                  | Autor i tytuł potwierdzone (ResearchGate, kopia w ISTQB); cytat potwierdzony tylko przez fragmenty wyszukiwarki. Brak recenzowanego wydawcy.                                        |
+| Bavadiya 2022          | **słabe, nie zweryfikowano**                               | Rok 2022 podejrzany (PDF utworzony we wrześniu 2025, ID ResearchGate z 2025). Liczby 93,64% i cytatu nie znaleziono. Opis w RAPORT.md („matematycznie udowadnia") nie jest poparty. |
 
 ## 2. Źródła zweryfikowane
 
