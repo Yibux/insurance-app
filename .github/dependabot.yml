@@ -14,14 +14,39 @@ updates:
     cooldown:
       default-days: 7
     ignore:
-      # @salesforce/eslint-config-lwc 3.x has a peer dependency on
-      # eslint-plugin-lightning ^1.0.0, so a 2.x bump breaks `npm ci` (ERESOLVE,
-      # see #126). Wait for eslint-config-lwc 4.x (#109) and bump both together.
-      - dependency-name: "@salesforce/eslint-plugin-lightning"
+      # eslint 10 is not supported by @salesforce/eslint-config-lwc 4.x (peer
+      # eslint ^9) and breaks the @babel/eslint-parser peer range (#131). Drop
+      # this entry once eslint-config-lwc supports eslint 10.
+      - dependency-name: "eslint"
+        update-types:
+          - "version-update:semver-major"
+      - dependency-name: "@eslint/js"
         update-types:
           - "version-update:semver-major"
     groups:
+      # The eslint toolchain packages constrain each other's peer ranges, so
+      # separate PRs fail `npm ci` with ERESOLVE (#126, #131). Keep them in one
+      # PR, including major updates.
+      eslint-toolchain:
+        patterns:
+          - "eslint"
+          - "@eslint/*"
+          - "eslint-plugin-*"
+          - "@lwc/eslint-plugin-*"
+          - "@salesforce/eslint-*"
+          - "@babel/core"
+          - "@babel/eslint-parser"
+          - "globals"
       npm-minor-patch:
+        exclude-patterns:
+          - "eslint"
+          - "@eslint/*"
+          - "eslint-plugin-*"
+          - "@lwc/eslint-plugin-*"
+          - "@salesforce/eslint-*"
+          - "@babel/core"
+          - "@babel/eslint-parser"
+          - "globals"
         update-types:
           - minor
           - patch
