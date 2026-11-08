@@ -9,6 +9,7 @@ on:
       - "sfdx-project.json"
       - "scripts/ci/check_coverage.py"
       - "scripts/ci/gate_report.py"
+      - "scripts/ci/delta_plan.py"
       - ".github/actions/gate-durations/**"
       - ".github/workflows/scratch-org-validation.yml"
 
@@ -48,6 +49,34 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Plan deployment (delta or full)
+        id: plan
+        # Any failure of this step leaves `mode` unset, which the deploy steps
+        # treat as "full" (ADR 0011). The planner is executed from the BASE
+        # commit, never from the PR, so a PR cannot choose delta for itself; a
+        # base without the planner (the PR that introduces it) fails here and
+        # therefore deploys in full. The base commit is a SHA from the event
+        # payload, validated below; no free-text PR field is used.
+        continue-on-error: true
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          [ "$EVENT_NAME" = "pull_request" ] || { echo "not a pull_request event"; exit 1; }
+          [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "malformed base SHA"; exit 1; }
+          git fetch --no-tags --depth=1 origin "$BASE_SHA"
+          # Pipeline or gate-script changes always validate in full, whatever the planner says.
+          if [ -n "$(git diff --name-only -z "$BASE_SHA" HEAD -- .github scripts/ci | head -c 1)" ]; then
+            echo "mode=full" >> "$GITHUB_OUTPUT"
+            echo "reason=.github/ or scripts/ci/ changed" >> "$GITHUB_OUTPUT"
+            echo "### Deployment plan: full" >> "$GITHUB_STEP_SUMMARY"
+            echo "- .github/ or scripts/ci/ changed" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          mkdir -p "$RUNNER_TEMP/delta"
+          git show "$BASE_SHA:scripts/ci/delta_plan.py" > "$RUNNER_TEMP/delta/base_delta_plan.py"
+          python3 -I "$RUNNER_TEMP/delta/base_delta_plan.py" --paths-file "$RUNNER_TEMP/delta/paths.nul"
 
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
@@ -94,11 +123,63 @@ jobs:
           echo "SF_SITE_ADMIN_USERNAME=${username}" >> "$GITHUB_ENV"
           echo "Scratch org ${SCRATCH_ALIAS} created."
 
-      - name: Deploy source
-        run: sf project deploy start --target-org "$SCRATCH_ALIAS" --wait 30
+      - name: Deploy source (delta)
+        id: deploy_delta
+        if: steps.plan.outputs.mode == 'delta'
+        # A delta deploy into a fresh org can fail only because an unchanged
+        # dependency is missing; the full deploy below then gives the verdict.
+        continue-on-error: true
+        run: |
+          mapfile -d '' -t delta_paths < "$RUNNER_TEMP/delta/paths.nul"
+          # An empty list would make `sf` deploy everything; refuse it, and
+          # refuse any path outside the self-contained LWC/Aura folders.
+          [ "${#delta_paths[@]}" -gt 0 ] || { echo "::error::Empty delta path list."; exit 1; }
+          source_args=()
+          for path in "${delta_paths[@]}"; do
+            case "$path" in
+              force-app/main/default/lwc/* | force-app/main/default/aura/*) ;;
+              *) echo "::error::Unexpected path in delta list."; exit 1 ;;
+            esac
+            source_args+=(--source-dir "$path")
+          done
+          echo "Deploying ${#delta_paths[@]} changed file(s)."
+          sf project deploy start --target-org "$SCRATCH_ALIAS" "${source_args[@]}" --wait 30
+
+      - name: Deploy source (full)
+        id: deploy_full
+        if: steps.plan.outputs.mode != 'delta' || steps.deploy_delta.outcome != 'success'
+        env:
+          DELTA_OUTCOME: ${{ steps.deploy_delta.outcome }}
+        run: |
+          if [ "$DELTA_OUTCOME" = "failure" ]; then
+            echo "::warning::Delta deploy failed; falling back to a full deploy."
+          fi
+          sf project deploy start --target-org "$SCRATCH_ALIAS" --wait 30
+
+      - name: Deployment mode
+        id: mode
+        env:
+          DELTA_OUTCOME: ${{ steps.deploy_delta.outcome }}
+          PLAN_MODE: ${{ steps.plan.outputs.mode }}
+          PLAN_REASON: ${{ steps.plan.outputs.reason }}
+        run: |
+          if [ "$DELTA_OUTCOME" = "success" ]; then final=delta; else final=full; fi
+          echo "final=${final}" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Deployment: ${final}"
+            echo
+            echo "- plan: ${PLAN_MODE:-full (planner failed)}; ${PLAN_REASON:-no reason recorded}"
+            if [ "$final" = "delta" ]; then
+              echo "- Apex tests and the coverage gate were skipped: the delta contains only UI metadata that Apex tests cannot depend on (ADR 0011)."
+            fi
+            if [ "$PLAN_MODE" = "delta" ] && [ "$final" = "full" ]; then
+              echo "- delta deploy failed, so the full deploy ran (fallback)."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Run Apex tests
         id: apex
+        if: steps.mode.outputs.final == 'full'
         run: |
           # Run only our test classes: RunLocalTests would also run the
           # Experience Cloud controller tests the platform adds to the org.

@@ -134,6 +134,8 @@ Etap odpowiada numerowi z [harmonogramu](HARMONOGRAM.md#2-harmonogram-start-1210
 | NFR-PERF-04 | Endpoint OData odpowiada ≤ 2 s dla stron do 100 rekordów                                    | S    | 5    | Pomiar                      |
 | NFR-PERF-05 | Potok mieści się w limitach Dev Hub DE (≤ 3 aktywne scratch orgi, ≤ 6/dzień)                | M    | 1    | Konfiguracja concurrency    |
 
+Uwaga (dowód NFR-PERF-01): bazowy pomiar z etapu 1 ([#26](https://github.com/Yibux/insurance-app/issues/26), `docs/experiment/results/baseline.csv`) dał medianę 102 s (n=5), czyli w granicy ≤ 20 min; pomiar końcowy pozostaje w etapie 6.
+
 ### 3.4 Utrzymywalność i dokumentacja (NFR-MNT)
 
 | ID         | Wymaganie                                                                                | Prio | Etap | Weryfikacja              |
