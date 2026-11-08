@@ -193,7 +193,7 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
 
 ### #26 Measure baseline pipeline duration
 
-- **Data:** 2026-11-06 · **PR:** #125 (ułożony na #124: **należy zmergować po #124**) · **Wymagania:** NFR-PERF-05
+- **Data:** 2026-11-06 · **PR:** #125 (ułożony na #124: **należy zmergować po #124**) · **Wymagania:** NFR-PERF-01 (dodatkowo NFR-PERF-05: zużycie scratch orgów)
 - **Co zrobiono:** Zmierzono bazowy czas całego potoku PR przy pełnym wdrożeniu do scratch orga (stan przed #122, delta deployment). Wyniki: [docs/experiment/results/baseline.csv](../experiment/results/baseline.csv) (5 przebiegów + wiersze `stat_*`: mediana, średnia, wariancja i odchylenie z próby, min, max).
 - **Jak (definicja pomiaru):**
   - jednostka pomiaru: jeden head SHA w PR do `main`; `pipeline_seconds` = od utworzenia najwcześniejszego z trzech przebiegów (PR validation, CodeQL, Scratch org validation; przybliżenie momentu push) do najpóźniejszego `updated_at` któregokolwiek z nich (ścieżka krytyczna); wartość z API Actions, rozdzielczość 1 s;
@@ -207,7 +207,7 @@ Wpisy dodawane po zamknięciu każdego zadania etapu (szablon: [KONWENCJE.md](..
   - w N2 i N3 job „Lint, format and LWC Jest” zakończył się błędem na `npm ci` (`ERESOLVE`: `@salesforce/eslint-config-lwc@3.7.2` wymaga peer `@salesforce/eslint-plugin-lightning@^1.0.0`, a projekt ma `2.0.0`), choć w N1 ten sam krok przeszedł, a `package*.json` jest identyczny z `main`. Przyczyną nie był niedeterminizm runnera: Dependabot PR #111 (aktualizacja `eslint-plugin-lightning` do 2.0.0) został zmergowany do `main` o 21:44:38Z, między N1 a N2, a przebiegi `pull_request` testują merge z aktualnym `main`, więc N1 widział stary `main`, a N2 i N3 nowy; naprawione w #126/#127 (opis w sekcji #126). Awaria nie jest związana ze zmianą w `force-app/`. Skutek dla pomiaru: `job_static_checks_s` w N2 i N3 (7-8 s) to czas do awarii, nie czas bramki, więc statystyki tej kolumny i `pr_validation_seconds` nie są wiarygodne dla tych dwóch przebiegów; `pipeline_seconds` nie zależy od nich, bo ścieżką krytyczną jest scratch org. Zgłoszone i naprawione jako #126 (PR #127).
   - czas trwania zależy od obciążenia współdzielonych runnerów i Dev Hubu, próba n=5 jest mała, a punkt startu to czas utworzenia przebiegu, nie moment `git push`.
 - **Dowody:** `gh api` dla każdego z 15 przebiegów (dane w CSV, skrypt jednorazowy poza repozytorium); wszystkie przebiegi Scratch org validation i CodeQL zakończone sukcesem, PR validation: B1, B2, N1 sukces, N2, N3 błąd opisany wyżej. Zużyto 3 scratch orgi (N1-N3); w ciągu 24 h wcześniej 2 (8:26 i 11:19 UTC). Brak `LIMIT_EXCEEDED`.
-- **Do pracy:** rozdział wyników (M6, NFR-PERF-05): punkt odniesienia dla porównania z delta deployment (#122).
+- **Do pracy:** rozdział wyników (M6, NFR-PERF-01): punkt odniesienia dla porównania z delta deployment (#122).
 
 ### #126 Main zepsuty przez eslint-plugin-lightning 2.0.0 (npm ci ERESOLVE)
 
