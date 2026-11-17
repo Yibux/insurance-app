@@ -26,3 +26,12 @@ engines:
         violation_message: "Use `with sharing` or `inherited sharing`; `without sharing` needs an ADR and a suppression."
         severity: 2
         tags: ["Recommended", "Security", "Apex"]
+      # Since API 67.0 Apex runs in user mode by default, so an explicit switch
+      # to system mode is the remaining way to bypass CRUD/FLS and sharing.
+      ApexNoSystemMode:
+        regex: /\bWITH\s+SYSTEM_MODE\b|\bAccessLevel\.SYSTEM_MODE\b|\bas\s+system\b/gi
+        file_extensions: [".cls", ".trigger"]
+        description: "Apex must not switch to system mode (WITH SYSTEM_MODE, AccessLevel.SYSTEM_MODE, DML as system)."
+        violation_message: "System mode bypasses CRUD/FLS and sharing; it needs an ADR and a suppression."
+        severity: 2
+        tags: ["Recommended", "Security", "Apex"]
